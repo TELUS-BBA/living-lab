@@ -1,3 +1,7 @@
 from django.db import models
 
-# Create your models here.
+
+class NanoPi(models.Model):
+    mac_address = models.CharField(max_length=50)
+    apparent_ip = models.GenericIPAddressField(protocol='IPv4')
+    add_date = models.DateTimeField(auto_now_add=True)

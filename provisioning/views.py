@@ -1,3 +1,8 @@
-from django.shortcuts import render
+from rest_framework import viewsets
+from provisioning.models import NanoPi
+from provisioning.serializers import NanoPiSerializer
 
-# Create your views here.
+
+class NanoPiViewSet(viewsets.ModelViewSet):
+    queryset = NanoPi.objects.all()
+    serializer_class = NanoPiSerializer

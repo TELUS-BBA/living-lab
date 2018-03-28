@@ -1,3 +1,5 @@
 from django.contrib import admin
+from testresults.models import Iperf3Result, PingResult
 
-# Register your models here.
+admin.site.register(Iperf3Result)
+admin.site.register(PingResult)
