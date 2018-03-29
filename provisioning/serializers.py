@@ -6,4 +6,4 @@ class NanoPiSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = NanoPi
-        fields = ['id', 'mac_address', 'apparent_ip', 'add_date']
+        fields = ['id', 'username', 'password', 'apparent_ip', 'add_date', 'location_info', 'misc_info']

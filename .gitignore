@@ -3,3 +3,4 @@
 db.sqlite3
 provisioning/migrations/
 testresults/migrations/
+scripts/migrations/
