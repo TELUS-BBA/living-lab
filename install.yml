@@ -1,3 +1,21 @@
 ---
 - name: Base NanoPi Config
-- tasks:
+  hosts: localhost
+  tasks:
+
+    - name: install pip3
+      become: yes
+      apt:
+        name: python3-pip
+        state: present
+          
+    - name: install xkcdpass
+      become: yes
+      pip:
+        name: xkcdpass
+        executable: pip-3.*
+
+    - name: install requests
+      become: yes
+      pip:
+        name: requests

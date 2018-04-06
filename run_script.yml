@@ -1,0 +1,6 @@
+---
+- name: Tries to run a python script
+  hosts: localhost
+  tasks:
+    - name: run the script
+      script: scripts/provision_nanopi.py
