@@ -1,0 +1,3 @@
+---
+- name: Base NanoPi Config
+- tasks:
