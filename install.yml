@@ -13,9 +13,10 @@
       become: yes
       pip:
         name: xkcdpass
-        executable: pip-3.*
+        executable: pip3
 
     - name: install requests
       become: yes
       pip:
         name: requests
+        executable: pip3
