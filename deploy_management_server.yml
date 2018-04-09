@@ -1,0 +1,30 @@
+---
+- name: deploys the management server
+  hosts: uberserve
+  vars:
+    container_name: livinglab-management-server
+  tasks:
+
+    - name: ensure there are no lxd containers with the claimed name
+      lxd_container:
+        name: "{{ container_name }}"
+        state: absent
+
+    - name: create lxd container
+      lxd_container: 
+        name: "{{ container_name }}"
+        state: started
+        source:
+          type: image
+          mode: pull
+          server: https://images.linuxcontainers.org
+          protocol: lxd
+          alias: ubuntu/xenial/amd64
+          wait_for_ipv4_addresses: true
+        profiles: ["default"]
+
+  #    - name: ensure that python is installed in container
+  #      delegate_to: "{{ container_name }}"
+  #      apt:
+  #        name: python3
+  #        state: present
