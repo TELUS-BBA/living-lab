@@ -49,6 +49,9 @@ RUN pip3 install -r /home/docker/code/app/requirements.txt
 # add (the rest of) our code
 COPY . /home/docker/code/
 
+# create admin user with default password
+RUN /home/docker/code/app/manage.py createsuperuser --username admin --email someone@example.com
+
 EXPOSE 80
 
 # for when it is production-ready
