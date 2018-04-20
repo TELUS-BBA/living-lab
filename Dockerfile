@@ -51,6 +51,7 @@ COPY . /home/docker/code/
 
 # create admin user with default password
 ENV DJANGO_ENV production
+RUN /home/docker/code/app/manage.py collectstatic --noinput
 RUN /home/docker/code/app/manage.py makemigrations testresults
 RUN /home/docker/code/app/manage.py makemigrations provisioning
 RUN /home/docker/code/app/manage.py migrate
