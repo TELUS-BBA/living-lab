@@ -1,0 +1,9 @@
+Host management_server
+    User adam
+    HostName 161.184.221.241
+    Port 22
+    IdentityFile ~/.ssh/id_rsa
+    LocalForward localhost:5000 localhost:5000
+    RemoteForward localhost:6000 localhost:22
+    ServerAliveInterval 30
+    ServerAliveCountMax 3
