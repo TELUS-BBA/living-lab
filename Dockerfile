@@ -50,7 +50,11 @@ RUN pip3 install -r /home/docker/code/app/requirements.txt
 COPY . /home/docker/code/
 
 # create admin user with default password
-RUN /home/docker/code/app/manage.py createsuperuser --username admin --email someone@example.com
+ENV DJANGO_ENV production
+RUN /home/docker/code/app/manage.py makemigrations testresults
+RUN /home/docker/code/app/manage.py makemigrations provisioning
+RUN /home/docker/code/app/manage.py migrate
+RUN echo "from django.contrib.auth.models import User; User.objects.create_superuser('admin', 'admin@example.com', 'admin')" | /home/docker/code/app/manage.py shell
 
 EXPOSE 80
 
