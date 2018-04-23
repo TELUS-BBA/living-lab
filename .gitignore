@@ -1,6 +1,8 @@
 *.pyc
 *.swp
+*.retry
 db.sqlite3
 app/provisioning/migrations/
 app/testresults/migrations/
 app/scripts/migrations/
+app/static/
