@@ -91,3 +91,35 @@
       file:
         path: /home/adam/management/logs/
         state: directory
+
+    - name: hard link between nginx-app.conf and /etc/nginx/sites-enabled/default
+      become: true
+      file:
+        state: link
+        src: /home/adam/management/nginx-app.conf
+        dest: /etc/nginx/sites-enabled/default
+
+    - name: run django's makemigrations
+      django_manage:
+        command: makemigrations
+        app_path: /home/adam/management/app/
+
+    - name: run django's migrate
+      django_manage:
+        command: migrate
+        app_path: /home/adam/management/app/
+
+    - name: run django's collectstatic
+      django_manage:
+        command: collectstatic
+        app_path: /home/adam/management/app/
+
+    - name: check if django superuser exists
+      shell: echo "import sys; from django.contrib.auth.models import User; sys.exit(0 if User.objects.filter(username='admin').count() > 0 else 1)" | /home/adam/management/app/manage.py shell
+      register: checksuperuser
+      ignore_errors: true
+      changed_when: false
+
+    - name: create a django superuser
+      shell: echo "from django.contrib.auth.models import User; User.objects.create_superuser('admin', 'admin@example.com', 'admin')" | /home/adam/management/app/manage.py shell
+      when: checksuperuser.rc != 0
