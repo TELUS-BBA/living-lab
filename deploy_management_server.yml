@@ -1,13 +1,79 @@
 ---
 - name: deploys the management server
-  hosts: uberserve
-  vars:
-    container_name: livinglab-management-server
+  hosts: management
   tasks:
 
-    - name: ensure docker is on the server
+    - name: ensure git is on server
       apt:
-        name: docker.io
+        name: git
         state: present
 
-    - name:
+    - name: ensure nginx is on server
+      apt:
+        name: nginx
+        state: present
+
+    - name: ensure sqlite3 is on server
+      apt:
+        name: sqlite3
+        state: present
+
+    - name: ensure python3 is on server
+      apt:
+        name: python3
+        state: present
+
+    - name: ensure python3-dev is on server
+      apt:
+        name: python3-dev
+        state: present
+
+    - name: ensure python3-setuptools is on server
+      apt:
+        name: python3-setuptools
+        state: present
+
+    - name: ensure pip3 is on server
+      apt:
+        name: python3-pip
+        state: present
+
+    - name: ensure uwsgi-plugin-python3 is on server
+      apt:
+        name: uwsgi-plugin-python3
+        state: present
+
+    - name: ensure uwsgi is installed
+      pip:
+        name: uwsgi
+        executable: pip3
+
+    - name: ensure django is installed
+      pip:
+        name: django
+        executable: pip3
+
+    - name: ensure djangorestframework is installed
+      pip:
+        name: djangorestframework
+        executable: pip3
+
+    - name: ensure markdown is installed
+      pip:
+        name: markdown
+        executable: pip3
+
+    - name: ensure django-filter is installed
+      pip:
+        name: django-filter
+        executable: pip3
+
+    - name: clone living-lab-server github repo
+      git:
+        repo: https://github.com/adamkpickering/living-lab-server.git
+        dest: /home/adam/management/
+
+    - name: ensure logs directory exists
+      file:
+        path: /home/adam/management/logs/
+        state: directory
