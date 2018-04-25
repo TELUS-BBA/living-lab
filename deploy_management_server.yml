@@ -45,17 +45,17 @@
         name: python3-pip
         state: present
 
+    - name: ensure uwsgi is on server
+      become: true
+      apt:
+        name: uwsgi
+        state: present
+
     - name: ensure uwsgi-plugin-python3 is on server
       become: true
       apt:
         name: uwsgi-plugin-python3
         state: present
-
-    - name: ensure uwsgi is installed
-      become: true
-      pip:
-        name: uwsgi
-        executable: pip3
 
     - name: ensure django is installed
       become: true
@@ -92,12 +92,34 @@
         path: /home/adam/management/logs/
         state: directory
 
-    - name: hard link between nginx-app.conf and /etc/nginx/sites-enabled/default
+    - name: link between uwsgi.service and /etc/systemd/system/uwsgi.service
+      become: true
+      file:
+        state: link
+        src: /home/adam/management/uwsgi.service
+        dest: /etc/systemd/system/uwsgi.service
+
+    - name: enable and start uwsgi
+      become: true
+      systemd:
+        name: uwsgi
+        enabled: true
+        state: restarted
+        daemon_reload: yes
+
+    - name: link between nginx-app.conf and /etc/nginx/sites-enabled/default
       become: true
       file:
         state: link
         src: /home/adam/management/nginx-app.conf
         dest: /etc/nginx/sites-enabled/default
+
+    - name: enable and start nginx
+      become: true
+      systemd:
+        name: nginx
+        enabled: true
+        state: restarted
 
     - name: run django's makemigrations
       django_manage:
