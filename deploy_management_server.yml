@@ -1,4 +1,5 @@
 ---
+# check that the client key is in authorized_keys???
 - name: deploys the management server
   hosts: management
   tasks:
@@ -29,24 +30,6 @@
         - djangorestframework
         - markdown
         - django-filter
-
-  #    - name: ensure djangorestframework is installed
-  #      become: true
-  #      pip:
-  #        name: djangorestframework
-  #        executable: pip3
-  #
-  #    - name: ensure markdown is installed
-  #      become: true
-  #      pip:
-  #        name: markdown
-  #        executable: pip3
-  #
-  #    - name: ensure django-filter is installed
-  #      become: true
-  #      pip:
-  #        name: django-filter
-  #        executable: pip3
 
     - name: clone living-lab-server github repo
       git:
