@@ -1,0 +1,14 @@
+[Unit]
+Description=AutoSSH local tunnel
+ConditionPathExists=|/usr/bin
+After=network.target
+
+[Service]
+Environment="AUTOSSH_GATETIME=0"
+User=nanopi
+ExecStart=/usr/bin/ssh -TN -o ServerAliveInterval=30 -o ServerAliveCountMax=3 -p 22 -i /home/nanopi/.ssh/id_rsa -L localhost:5000:localhost:5000 adam@{{ management_server }}
+RestartSec=3
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
