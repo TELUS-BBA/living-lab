@@ -12,6 +12,7 @@ class NanoPi(User):
     misc_info = models.TextField(blank=True)
 
 
+# creates nanopi group if it does not already exist
 @receiver(post_save, sender=NanoPi)
 def add_to_nanopi_group(sender, instance, created, **kwargs):
     if created:
