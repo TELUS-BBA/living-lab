@@ -14,7 +14,6 @@
         - python3-pip
         - python3-dev
         - python3-setuptools
-        - autossh
           
     - name: ensure pip3 packages are present
       become: true
@@ -73,8 +72,29 @@
         state: restarted
         daemon_reload: true
 
-    # **** must restart in order for the changes to take effect ****
 
-  #    - name: run the script
-  #      script: test.py
-  #      register: test_variable
+    - name: provision nanopi
+      script: "provision_nanopi.py {{ admin_user }} {{ admin_pass }} localhost 5000" 
+      register: provision_result
+
+    - name: ensure proper permissions are set for /home/nanopi/info file
+      file:
+        path: /home/nanopi/info
+        state: file
+        mode: 0600
+
+    - name: copy remote service to systemd directory
+      become: true
+      template:
+        src: remote-tunnel.service
+        dest: /etc/systemd/system/remote-tunnel.service
+
+    - name: enable and start remote tunnel
+      become: true
+      systemd:
+        name: remote-tunnel
+        enabled: true
+        state: restarted
+        daemon_reload: true
+          #
+    # **** must restart in order for the systemd changes to take effect ****
