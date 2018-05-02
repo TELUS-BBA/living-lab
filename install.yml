@@ -2,6 +2,14 @@
 - name: Base NanoPi Config
   gather_facts: false
   hosts: nanopis
+  handlers:
+
+    - name: shutdown nanopi
+      become: true
+      command: "shutdown +1"
+      async: 0
+      poll: 0
+
   tasks:
 
     - name: ensure apt packages are present
@@ -71,7 +79,8 @@
         enabled: true
         state: restarted
         daemon_reload: true
-
+      notify:
+        - shutdown nanopi
 
     - name: provision nanopi
       script: "provision_nanopi.py {{ admin_user }} {{ admin_pass }} localhost 5000" 
@@ -96,5 +105,8 @@
         enabled: true
         state: restarted
         daemon_reload: true
-          #
-    # **** must restart in order for the systemd changes to take effect ****
+      notify:
+        - shutdown nanopi
+
+    # nanopis will shut down a minute after this command exits; once this happens they may be restarted
+    # and they will work as they should
