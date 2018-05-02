@@ -37,10 +37,41 @@
         dest: /home/adam/management/
         force: true
 
+    - name: ensure we have DEBUG = False in settings.py
+      lineinfile:
+        path: /home/adam/management/app/livinglabserver/settings.py
+        regexp: "^DEBUG = "
+        line: "DEBUG = False"
+
     - name: ensure logs directory exists
       file:
         path: /home/adam/management/logs/
         state: directory
+
+    - name: run django's makemigrations
+      django_manage:
+        command: makemigrations
+        app_path: /home/adam/management/app/
+
+    - name: run django's migrate
+      django_manage:
+        command: migrate
+        app_path: /home/adam/management/app/
+
+    - name: run django's collectstatic
+      django_manage:
+        command: collectstatic
+        app_path: /home/adam/management/app/
+
+    - name: check if django superuser exists
+      shell: echo "import sys; from django.contrib.auth.models import User; sys.exit(0 if User.objects.filter(username='admin').count() > 0 else 1)" | /home/adam/management/app/manage.py shell
+      register: checksuperuser
+      ignore_errors: true
+      changed_when: false
+
+    - name: create a django superuser
+      shell: echo "from django.contrib.auth.models import User; User.objects.create_superuser('admin', 'admin@example.com', 'admin')" | /home/adam/management/app/manage.py shell
+      when: checksuperuser.rc != 0
 
     - name: link between uwsgi.service and /etc/systemd/system/uwsgi.service
       become: true
@@ -70,28 +101,19 @@
         name: nginx
         enabled: true
         state: restarted
+        daemon_reload: yes
 
-    - name: run django's makemigrations
-      django_manage:
-        command: makemigrations
-        app_path: /home/adam/management/app/
+    - name: ensure line "ClientAliveInterval 4" is in sshd_config
+      become: true
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: "^ClientAliveInterval "
+        line: "ClientAliveInterval 4"
 
-    - name: run django's migrate
-      django_manage:
-        command: migrate
-        app_path: /home/adam/management/app/
-
-    - name: run django's collectstatic
-      django_manage:
-        command: collectstatic
-        app_path: /home/adam/management/app/
-
-    - name: check if django superuser exists
-      shell: echo "import sys; from django.contrib.auth.models import User; sys.exit(0 if User.objects.filter(username='admin').count() > 0 else 1)" | /home/adam/management/app/manage.py shell
-      register: checksuperuser
-      ignore_errors: true
-      changed_when: false
-
-    - name: create a django superuser
-      shell: echo "from django.contrib.auth.models import User; User.objects.create_superuser('admin', 'admin@example.com', 'admin')" | /home/adam/management/app/manage.py shell
-      when: checksuperuser.rc != 0
+    - name: restart sshd
+      become: true
+      systemd:
+        name: sshd
+        enabled: true
+        state: restarted
+        daemon_reload: yes
