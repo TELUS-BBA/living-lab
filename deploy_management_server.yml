@@ -1,5 +1,4 @@
 ---
-# check that the client key is in authorized_keys???
 - name: deploys the management server
   hosts: management
   tasks:
@@ -102,6 +101,12 @@
         enabled: true
         state: restarted
         daemon_reload: yes
+
+    - name: put the client key in authorized_keys
+      copy:
+        src: /home/adam/.ssh/id_rsa.pub
+        dest: /home/adam/.ssh/authorized_keys
+        mode: 0600
 
     - name: ensure line "ClientAliveInterval 4" is in sshd_config
       become: true
