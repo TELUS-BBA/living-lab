@@ -6,9 +6,10 @@
 
     - name: shutdown nanopi
       become: true
-      command: "shutdown +1"
-      async: 0
+      shell: sleep 3 && shutdown now
+      async: 1
       poll: 0
+      ignore_errors: true
 
   tasks:
 
