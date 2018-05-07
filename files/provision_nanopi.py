@@ -44,7 +44,8 @@ response_json = response.json()
 
 # write results to file
 with open('/home/nanopi/info', 'w+') as fd:
-    #info = {"username": username, "password": password, "port": response_json.get("ssh_port")}
+    response_json['username'] = username
+    response_json['password'] = password
     fd.write(json.dumps(response_json))
 
 print(response_json.get('ssh_port'))
