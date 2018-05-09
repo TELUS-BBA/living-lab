@@ -1,6 +1,8 @@
 ---
 - name: configure the nanopi to run tests on a schedule
   gather_facts: false
+  vars_files:
+    - vars.yml
   hosts: nanopis
   #  handlers:
   #
@@ -40,10 +42,15 @@
         - apscheduler
         - maya
 
-    - name:
-      copy:
+    - name: generate random number between 0 and 59, which is when intense tests will run
+      script: files/generate_minute.py
+      register: test_time
+
+    - name: copy schedule.py into place, filling vars
+      template:
         src: files/schedule.py
         dest: /home/nanopi/schedule.py
+        mode: 0700
 
     - name: copy scheduled-testing.service to systemd directory
       become: true

@@ -1,10 +1,10 @@
 [Unit]
-Description=SSH local tunnel
+Description=scheduled network testing
 After=network.target
 
 [Service]
 User=nanopi
-ExecStart=/usr/bin/python3 /home/nanopi/schedule.py
+ExecStart=/usr/bin/python3 -u /home/nanopi/schedule.py
 RestartSec=3
 Restart=always
 

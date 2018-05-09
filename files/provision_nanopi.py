@@ -45,7 +45,6 @@ response_json = response.json()
 
 # write results to file
 with open('/home/nanopi/info', 'w+') as fd:
-    response_json['test_time'] = random.randrange(0, 60)
     response_json['username'] = username
     response_json['password'] = password
     fd.write(json.dumps(response_json))

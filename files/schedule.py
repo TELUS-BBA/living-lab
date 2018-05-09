@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 from apscheduler.schedulers.blocking import BlockingScheduler
 import maya
 import iperf3
@@ -9,9 +10,10 @@ from requests.auth import HTTPBasicAuth
 import json
 
 
-IPERF_HOST = {{ iperf_host }}
+TEST_TIME = '{{ test_time.stdout_lines[0] }}'
+IPERF_HOST = '{{ iperf_host }}'
 IPERF_PORT = {{ iperf_port }}
-MANAGEMENT_HOST = "localhost"
+MANAGEMENT_HOST = 'localhost'
 MANAGEMENT_PORT = 5000
 POST_URL = "http://{}:{}/testresults/iperf3/".format(MANAGEMENT_HOST, MANAGEMENT_PORT)
 
@@ -24,6 +26,17 @@ def get_nanopi_info():
 # ---------------------------------------------------------------------
 # Intense Test
 # ---------------------------------------------------------------------
+
+
+def do_iperf_test(host, port, iperf_test):
+    """Gets a port from the iperf3 mux server and runs the iperf3 test given in iperf_test"""
+    with socket.create_connection((host, port), 2) as s:
+        s.sendall("SENDPORT\r\n".encode())
+        iperf_port = int(s.recv(4096).decode())
+        iperf_test.port = iperf_port
+        time.sleep(1)
+        result = iperf_test.run()
+    return result
 
 
 def test_up(host, port):
@@ -52,37 +65,23 @@ def test_jitter(host, port):
     return result.jitter_ms
         
 
-def do_iperf_test(host, port, iperf_test):
-    """Gets a port from the iperf3 mux server and runs the iperf3 test given in iperf_test"""
-    with socket.create_connection((host, port), 2) as s:
-        s.sendall("SENDPORT\r\n".encode())
-        iperf_port = int(s.recv(4096).decode())
-        print("running test")
-        iperf_test.port = iperf_port
-        time.sleep(1)
-        result = iperf_test.run()
-    return result
-
-
-def intense_test():
+def intense_test(iperf_host, iperf_port, post_url):
     print("Running intense test at {}".format(maya.now().rfc2822()))
-    up_result = test_up(IPERF_HOST, IPERF_PORT)
-    print("up result: {}".format(up_result))
-    down_result = test_down(IPERF_HOST, IPERF_PORT)
-    print("down result: {}".format(down_result))
+    up_result = test_up(iperf_host, iperf_port)
+    down_result = test_down(iperf_host, iperf_port)
     info = get_nanopi_info()
     up_data = {
         'nanopi': info.get('id'),
         'direction': 'up',
         'bandwidth': up_result,
     }
-    response = requests.post(POST_URL, up_data, auth=HTTPBasicAuth(info.get('username'), info.get('password')))
+    response = requests.post(post_url, up_data, auth=HTTPBasicAuth(info.get('username'), info.get('password')))
     down_data = {
         'nanopi': info.get('id'),
-        'direction': 'up',
+        'direction': 'down',
         'bandwidth': down_result,
     }
-    response = requests.post(POST_URL, down_data, auth=HTTPBasicAuth(info.get('username'), info.get('password')))
+    response = requests.post(post_url, down_data, auth=HTTPBasicAuth(info.get('username'), info.get('password')))
 
 
 # ---------------------------------------------------------------------
@@ -102,8 +101,9 @@ def continuous_test():
 if __name__ == "__main__":
     info = get_nanopi_info()
     scheduler = BlockingScheduler()
-    scheduler.add_job(intense_test, 'cron', hour='*/1', minute=info.get('test_time'))
-    scheduler.add_job(continuous_test, 'cron', minute='*/5')
+    scheduler.add_job(intense_test, args=(IPERF_HOST, IPERF_PORT, POST_URL),
+                      trigger='cron', hour='*/1', minute=TEST_TIME)
+    scheduler.add_job(continuous_test, trigger='cron', minute='*/5')
     print("Starting scheduler...")
     try:
         scheduler.start()
