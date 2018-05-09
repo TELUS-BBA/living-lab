@@ -1,5 +1,5 @@
 ---
-- name: Base NanoPi Config
+- name: base nanopi config (ssh tunnels and provisioning with server)
   gather_facts: false
   hosts: nanopis
   handlers:
