@@ -2,14 +2,22 @@
 - name: base nanopi config (ssh tunnels and provisioning with server)
   gather_facts: false
   hosts: nanopis
+  vars_files:
+    - vars.yml
   handlers:
 
     - name: shutdown nanopi
       become: true
-      shell: sleep 3 && shutdown now
+      shell: sleep 3 && shutdown now -r
       async: 1
       poll: 0
       ignore_errors: true
+
+    - name: wait for nanopi to come back up
+      wait_for_connection:
+        delay: 10
+        sleep: 2
+        timeout: 60
 
   tasks:
 
@@ -108,6 +116,7 @@
         daemon_reload: true
       notify:
         - shutdown nanopi
+        - wait for nanopi to come back up
 
     # nanopis will shut down a minute after this command exits; once this happens they may be restarted
     # and they will work as they should
