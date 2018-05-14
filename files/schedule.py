@@ -191,14 +191,14 @@ if __name__ == "__main__":
     network_lock = threading.Lock()
     cont_test_queue = []
     info = get_nanopi_info(args.info_path)
-    full_intense_result_path = "http://{}:{}{}".format(management_host, management_port, intense_result_path)
-    full_ping_path = "http://{}:{}{}".format(management_host, management_port, ping_result_path)
+    full_intense_result_path = "http://{}:{}{}".format(args.management_host, args.management_port, args.intense_result_path)
+    full_ping_path = "http://{}:{}{}".format(args.management_host, args.management_port, args.ping_result_path)
 
     scheduler = BlockingScheduler()
 #    scheduler.add_job(intense_test, args=(info, args.test_host, args.iperf_port, full_intense_result_path),
 #                      trigger='cron', hour='*/1', minute=args.intense_test_minute)
-    scheduler.add_job(continuous_test, args=(info, IPERF_HOST),
-                      trigger='cron', minute='*/5')
+    scheduler.add_job(continuous_test, args=(info, args.test_host),
+                      trigger='cron', second='*/2')
     print("Starting scheduler...")
     try:
         scheduler.start()
