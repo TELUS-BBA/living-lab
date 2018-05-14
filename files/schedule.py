@@ -12,18 +12,11 @@ from subprocess import Popen, PIPE, STDOUT
 import re
 from datetime import datetime
 import threading
+import argparse
 
 
-#TEST_TIME = '{{ test_time.stdout_lines[0] }}'
-#IPERF_HOST = '{{ iperf_host }}'
-#IPERF_PORT = {{ iperf_port }}
-#MANAGEMENT_HOST = 'localhost'
-#MANAGEMENT_PORT = 5000
-#POST_URL = "http://{}:{}/testresults/iperf3/".format(MANAGEMENT_HOST, MANAGEMENT_PORT)
-
-
-def get_nanopi_info():
-    with open('/home/nanopi/info', 'r') as fd:
+def get_nanopi_info(path):
+    with open(path, 'r') as fd:
         return json.loads(fd.read())
 
 
@@ -172,6 +165,7 @@ def continuous_test(info, host):
 # ---------------------------------------------------------------------
     
 
+@check_lock_nonblocking
 def continuous_test_upload():
     print("Running continuous test upload at {}".format(maya.now().rfc2822()))
 
@@ -182,12 +176,27 @@ def continuous_test_upload():
 
 
 if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('test_host')
+    parser.add_argument('iperf_port')
+    parser.add_argument('management_host')
+    parser.add_argument('management_port')
+    parser.add_argument('info_path')
+    parser.add_argument('ping_result_path')
+    parser.add_argument('intense_result_path')
+    parser.add_argument('intense_test_minute')
+    args = parser.parse_args()
+
     network_lock = threading.Lock()
     cont_test_queue = []
-    info = get_nanopi_info()
+    info = get_nanopi_info(args.info_path)
+    full_intense_result_path = "http://{}:{}{}".format(management_host, management_port, intense_result_path)
+    full_ping_path = "http://{}:{}{}".format(management_host, management_port, ping_result_path)
+
     scheduler = BlockingScheduler()
-#    scheduler.add_job(intense_test, args=(info, IPERF_HOST, IPERF_PORT, POST_URL),
-#                      trigger='cron', hour='*/1', minute=TEST_TIME)
+#    scheduler.add_job(intense_test, args=(info, args.test_host, args.iperf_port, full_intense_result_path),
+#                      trigger='cron', hour='*/1', minute=args.intense_test_minute)
     scheduler.add_job(continuous_test, args=(info, IPERF_HOST),
                       trigger='cron', minute='*/5')
     print("Starting scheduler...")

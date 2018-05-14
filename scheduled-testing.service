@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 User=nanopi
-ExecStart=/usr/bin/python3 -u /home/nanopi/schedule.py
+ExecStart=/usr/bin/python3 -u /home/nanopi/schedule.py {{ test_host }} {{ iperf_port }} {{ management_host }} {{ management_port }} {{ info_path }} {{ ping_result_path }} {{ intense_result_path }} {{ test_time.stdout_lines[0] }}
 RestartSec=3
 Restart=always
 

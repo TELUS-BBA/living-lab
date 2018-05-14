@@ -46,8 +46,8 @@
       script: files/generate_minute.py
       register: test_time
 
-    - name: copy schedule.py into place, filling vars
-      template:
+    - name: copy schedule.py into place
+      copy:
         src: files/schedule.py
         dest: /home/nanopi/schedule.py
         mode: 0700

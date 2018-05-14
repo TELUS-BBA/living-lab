@@ -1,6 +1,10 @@
 ---
-iperf_host:
-iperf_port: 
-management_server: 
-admin_user: 
+test_host:
+iperf_port:
+management_host:
+management_port:
+info_path:
+ping_result_path:
+intense_result_path:
+admin_user:
 admin_pass:
