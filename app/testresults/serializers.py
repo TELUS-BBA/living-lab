@@ -13,4 +13,4 @@ class PingResultSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = PingResult
-        fields = ['id', 'nanopi', 'data', 'upload_date']
+        fields = ['id', 'nanopi', 'state', 'time', 'upload_date']

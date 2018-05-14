@@ -11,8 +11,9 @@ class Iperf3Result(models.Model):
 
 class PingResult(models.Model):
     nanopi = models.ForeignKey(NanoPi, on_delete=models.CASCADE)
-    data = models.TextField()
-    upload_date = models.DateTimeField(auto_now_add=True)
+    state = models.CharField(max_length=4, choices=(('up', 'up'), ('down', 'down'),))
+    time = models.DateTimeField() # the time of the ping
+    upload_date = models.DateTimeField(auto_now_add=True) # the time that the group of pings was uploaded
     
 
 class SockPerfResult(models.Model):
