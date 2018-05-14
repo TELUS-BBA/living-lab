@@ -8,14 +8,18 @@ import time
 import requests
 from requests.auth import HTTPBasicAuth
 import json
+from subprocess import Popen, PIPE, STDOUT
+import re
+from datetime import datetime
+import threading
 
 
-TEST_TIME = '{{ test_time.stdout_lines[0] }}'
-IPERF_HOST = '{{ iperf_host }}'
-IPERF_PORT = {{ iperf_port }}
-MANAGEMENT_HOST = 'localhost'
-MANAGEMENT_PORT = 5000
-POST_URL = "http://{}:{}/testresults/iperf3/".format(MANAGEMENT_HOST, MANAGEMENT_PORT)
+#TEST_TIME = '{{ test_time.stdout_lines[0] }}'
+#IPERF_HOST = '{{ iperf_host }}'
+#IPERF_PORT = {{ iperf_port }}
+#MANAGEMENT_HOST = 'localhost'
+#MANAGEMENT_PORT = 5000
+#POST_URL = "http://{}:{}/testresults/iperf3/".format(MANAGEMENT_HOST, MANAGEMENT_PORT)
 
 
 def get_nanopi_info():
@@ -23,10 +27,68 @@ def get_nanopi_info():
         return json.loads(fd.read())
 
 
+def check_lock_nonblocking(func):
+    """Decorator for functions that require lock to be free. If the lock is not free it
+       does not execute func."""
+    def wrapper(*args, **kwargs):
+        if network_lock.acquire(blocking=False):
+            func(*args, **kwargs)
+            network_lock.release()
+    return wrapper
+
+
+def check_lock_blocking(func):
+    """Decorator for functions that require lock to be free. Blocks until the lock is free."""
+    def wrapper(*args, **kwargs):
+        network_lock.acquire(blocking=True)
+        func(*args, **kwargs)
+        network_lock.release()
+    return wrapper
+
+
 # ---------------------------------------------------------------------
 # Intense Test
 # ---------------------------------------------------------------------
 
+
+#def run_iperf_test(host, port, test_func):
+#    with socket.create_connection((host, port), 2) as s:
+#        s.sendall("SENDPORT\r\n".encode())
+#        received_port = int(s.recv(4096).decode())
+#        time.sleep(1)
+#        result = test_func(host, received_port)
+#    return result
+#
+#
+#def test_up(iperf_host, iperf_port):
+#    regex = re.compile('^\[SUM\].*\s([0-9]+) Mbits/sec.*sender.*$')
+#    cmd = ['iperf3', '-c', iperf_host, '-p', str(iperf_port), '-P', '4']
+#    process = Popen(cmd, stdin=None, stdout=PIPE, stderr=STDOUT, bufsize=1)
+#    for line in iter(process.stdout):
+#        match = regex.search(line.decode())
+#        if match is not None:
+#            result = int(match.group(1))
+#    return result
+#
+#
+#def test_down(iperf_host, iperf_port):
+#    regex = re.compile('^\[SUM\].*\s([0-9]+) Mbits/sec.*sender.*$')
+#    cmd = ['iperf3', '-c', iperf_host, '-p', str(iperf_port), '-P', '4', '-R']
+#    process = Popen(cmd, stdin=None, stdout=PIPE, stderr=STDOUT, bufsize=1)
+#    for line in iter(process.stdout):
+#        print(line)
+#        match = regex.search(line.decode())
+#        if match is not None:
+#            result = int(match.group(1))
+#    return result
+#
+#
+#def intense_test2(host, port):
+#    print("testing up")
+#    print(run_iperf_test(host, port, test_up))
+#    print("testing down")
+#    print(run_iperf_test(host, port, test_down))
+    
 
 def do_iperf_test(host, port, iperf_test):
     """Gets a port from the iperf3 mux server and runs the iperf3 test given in iperf_test"""
@@ -65,11 +127,10 @@ def test_jitter(host, port):
     return result.jitter_ms
         
 
-def intense_test(iperf_host, iperf_port, post_url):
+def intense_test(info, iperf_host, iperf_port, post_url):
     print("Running intense test at {}".format(maya.now().rfc2822()))
     up_result = test_up(iperf_host, iperf_port)
     down_result = test_down(iperf_host, iperf_port)
-    info = get_nanopi_info()
     up_data = {
         'nanopi': info.get('id'),
         'direction': 'up',
@@ -85,12 +146,34 @@ def intense_test(iperf_host, iperf_port, post_url):
 
 
 # ---------------------------------------------------------------------
-# Continuous Test Upload
+# Continuous/Gentle Test
 # ---------------------------------------------------------------------
     
 
-def continuous_test():
+@check_lock_nonblocking
+def continuous_test(info, host):
     print("Running continuous test at {}".format(maya.now().rfc2822()))
+    cmd = ["ping", "-c", "1", "-W", "1", host]
+    process = Popen(cmd, stdin=None, stdout=PIPE, stderr=STDOUT)
+    process.wait(timeout=2)
+    if process.returncode == 0:
+        state = 'up'
+    else:
+        state = 'down'
+    cont_test_queue.append({
+        'id': info.get('id'),
+        'time': maya.now().rfc3339(),
+        'state': state,
+    })
+
+
+# ---------------------------------------------------------------------
+# Continuous/Gentle Test Upload
+# ---------------------------------------------------------------------
+    
+
+def continuous_test_upload():
+    print("Running continuous test upload at {}".format(maya.now().rfc2822()))
 
 
 # ---------------------------------------------------------------------
@@ -99,11 +182,14 @@ def continuous_test():
 
 
 if __name__ == "__main__":
+    network_lock = threading.Lock()
+    cont_test_queue = []
     info = get_nanopi_info()
     scheduler = BlockingScheduler()
-    scheduler.add_job(intense_test, args=(IPERF_HOST, IPERF_PORT, POST_URL),
-                      trigger='cron', hour='*/1', minute=TEST_TIME)
-    scheduler.add_job(continuous_test, trigger='cron', minute='*/5')
+#    scheduler.add_job(intense_test, args=(info, IPERF_HOST, IPERF_PORT, POST_URL),
+#                      trigger='cron', hour='*/1', minute=TEST_TIME)
+    scheduler.add_job(continuous_test, args=(info, IPERF_HOST),
+                      trigger='cron', minute='*/5')
     print("Starting scheduler...")
     try:
         scheduler.start()
