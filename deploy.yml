@@ -94,7 +94,7 @@
     - name: provision nanopi
       script: >
         provision_nanopi.py {{ admin_user }} {{ admin_pass }}
-        {{ management_host }} {{ management_port }} {{ nanopi_provisioning_path }}
+        {{ management_host_tunnel }} {{ management_port_tunnel }} {{ nanopi_provisioning_path }}
       register: provision_result
 
     - name: ensure proper permissions are set for /home/nanopi/info file
