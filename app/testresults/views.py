@@ -18,8 +18,8 @@ class PingResultViewSet(ModelViewSet):
     permission_classes = (DjangoModelPermissions,)
 
     def create(self, request, *args, **kwargs):
-        list = isinstance(request.data, list)
-        if not list:
+        is_list = isinstance(request.data, list)
+        if not is_list:
             return super(PingResultViewSet, self).create(request, *args, **kwargs)
         else:
             serializer = self.get_serializer(data=request.data, many=True)
