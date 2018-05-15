@@ -90,13 +90,13 @@ def intense_test(info, iperf_host, iperf_port, post_url):
         'direction': 'up',
         'bandwidth': up_result,
     }
-    response = requests.post(post_url, up_data, auth=HTTPBasicAuth(info.get('username'), info.get('password')))
+    response = requests.post(post_url, json=up_data, auth=HTTPBasicAuth(info.get('username'), info.get('password')))
     down_data = {
         'nanopi': info.get('id'),
         'direction': 'down',
         'bandwidth': down_result,
     }
-    response = requests.post(post_url, down_data, auth=HTTPBasicAuth(info.get('username'), info.get('password')))
+    response = requests.post(post_url, json=down_data, auth=HTTPBasicAuth(info.get('username'), info.get('password')))
 
 
 # ---------------------------------------------------------------------
