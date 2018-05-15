@@ -13,6 +13,7 @@ import re
 from datetime import datetime
 import threading
 import argparse
+from copy import copy
 
 
 def get_nanopi_info(path):
@@ -81,6 +82,7 @@ def test_jitter(host, port):
     return result.jitter_ms
         
 
+@check_lock_blocking
 def intense_test(info, iperf_host, iperf_port, post_url):
     print("Running intense test at {}".format(maya.now().rfc2822()))
     up_result = test_up(iperf_host, iperf_port)
@@ -105,7 +107,7 @@ def intense_test(info, iperf_host, iperf_port, post_url):
     
 
 @check_lock_nonblocking
-def continuous_test(info, host):
+def continuous_test(info, host, results):
     print("Running continuous test at {}".format(maya.now().rfc2822()))
     cmd = ["ping", "-c", "1", "-W", "1", host]
     process = Popen(cmd, stdin=None, stdout=PIPE, stderr=STDOUT)
@@ -114,7 +116,7 @@ def continuous_test(info, host):
         state = 'up'
     else:
         state = 'down'
-    cont_test_queue.append({
+    results.append({
         'nanopi': info.get('id'),
         'time': maya.now().rfc3339(),
         'state': state,
@@ -126,9 +128,14 @@ def continuous_test(info, host):
 # ---------------------------------------------------------------------
     
 
-@check_lock_nonblocking
-def continuous_test_upload():
+@check_lock_blocking
+def continuous_test_upload(info, host, port, location, results):
     print("Running continuous test upload at {}".format(maya.now().rfc2822()))
+    list_to_upload = copy(results)
+    results.clear()
+    upload_url = "http://{}:{}{}".format(host, port, location)
+    response = requests.post(upload_url, json=list_to_upload, auth=HTTPBasicAuth(info.get('username'), info.get('password')))
+    return response
 
 
 # ---------------------------------------------------------------------
@@ -150,7 +157,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     network_lock = threading.Lock()
-    cont_test_queue = []
+    continuous_test_results = []
     info = get_nanopi_info(args.info_path)
     full_intense_result_path = "http://{}:{}{}".format(args.management_host, args.management_port, args.intense_result_path)
     full_ping_path = "http://{}:{}{}".format(args.management_host, args.management_port, args.ping_result_path)
@@ -158,8 +165,12 @@ if __name__ == "__main__":
     scheduler = BlockingScheduler()
 #    scheduler.add_job(intense_test, args=(info, args.test_host, args.iperf_port, full_intense_result_path),
 #                      trigger='cron', hour='*/1', minute=args.intense_test_minute)
-    scheduler.add_job(continuous_test, args=(info, args.test_host),
+    scheduler.add_job(continuous_test, args=(info, args.test_host, continuous_test_results),
                       trigger='cron', second='*/2')
+    scheduler.add_job(continuous_test_upload,
+                      args=(info, args.management_host, args.management_port, args.ping_result_path,
+                            continuous_test_results),
+                      trigger='cron', minute='*/5')
     print("Starting scheduler...")
     try:
         scheduler.start()
