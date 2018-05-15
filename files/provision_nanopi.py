@@ -13,9 +13,10 @@ parser.add_argument("user")
 parser.add_argument("password")
 parser.add_argument("hostname")
 parser.add_argument("port")
+parser.add_argument("nanopi_provisioning_path")
 args = parser.parse_args()
 
-API_HOST = "http://{}:{}/provisioning/nanopi/".format(args.hostname, args.port)
+API_HOST = "http://{}:{}{}".format(args.hostname, args.port, args.nanopi_provisioning_path)
 
 # get MAC and parse into a string without colons (to be used as username)
 mac = open('/sys/class/net/'+'eth0'+'/address').readline()
