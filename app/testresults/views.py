@@ -16,8 +16,6 @@ class PingResultViewSet(ModelViewSet):
     permission_classes = (DjangoModelPermissions,)
 
     def get_serializer(self, *args, **kwargs):
-        print(args)
-        print(kwargs)
         serializer_class = self.get_serializer_class()
         kwargs['context'] = self.get_serializer_context()
         kwargs['many'] = True
