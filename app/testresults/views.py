@@ -1,5 +1,7 @@
+from rest_framework import status
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import DjangoModelPermissions
+from rest_framework.response import Response
 from testresults.models import Iperf3Result, PingResult
 from testresults.serializers import Iperf3ResultSerializer, PingResultSerializer
 
@@ -15,8 +17,12 @@ class PingResultViewSet(ModelViewSet):
     serializer_class = PingResultSerializer
     permission_classes = (DjangoModelPermissions,)
 
-    def get_serializer(self, *args, **kwargs):
-        serializer_class = self.get_serializer_class()
-        kwargs['context'] = self.get_serializer_context()
-        kwargs['many'] = True
-        return serializer_class(*args, **kwargs)
+    def create(self, request, *args, **kwargs):
+        list = isinstance(request.data, list)
+        if not list:
+            return super(PingResultViewSet, self).create(request, *args, **kwargs)
+        else:
+            serializer = self.get_serializer(data=request.data, many=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
