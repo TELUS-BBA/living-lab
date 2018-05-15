@@ -115,7 +115,7 @@ def continuous_test(info, host):
     else:
         state = 'down'
     cont_test_queue.append({
-        'id': info.get('id'),
+        'nanopi': info.get('id'),
         'time': maya.now().rfc3339(),
         'state': state,
     })
