@@ -2,8 +2,14 @@ from rest_framework import status
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import DjangoModelPermissions
 from rest_framework.response import Response
+from rest_framework.pagination import CursorPagination
 from testresults.models import Iperf3Result, PingResult
 from testresults.serializers import Iperf3ResultSerializer, PingResultSerializer
+
+
+class PingResultPagination(CursorPagination):
+    page_size = 100
+    ordering = 'id'
 
 
 class Iperf3ResultViewSet(ModelViewSet):
@@ -16,6 +22,7 @@ class PingResultViewSet(ModelViewSet):
     queryset = PingResult.objects.all()
     serializer_class = PingResultSerializer
     permission_classes = (DjangoModelPermissions,)
+    pagination_class = PingResultPagination
 
     def create(self, request, *args, **kwargs):
         is_list = isinstance(request.data, list)
