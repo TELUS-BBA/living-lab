@@ -24,8 +24,15 @@ def check_lock_nonblocking(func):
        does not execute func."""
     def wrapper(*args, **kwargs):
         if network_lock.acquire(blocking=False):
-            func(*args, **kwargs)
-            network_lock.release()
+            print("network_lock acquired")
+            try:
+                func(*args, **kwargs)
+                network_lock.release()
+                print("network_lock released")
+            except:
+                network_lock.release()
+                print("network_lock released")
+                raise
     return wrapper
 
 
@@ -33,8 +40,15 @@ def check_lock_blocking(func):
     """Decorator for functions that require lock to be free. Blocks until the lock is free."""
     def wrapper(*args, **kwargs):
         network_lock.acquire(blocking=True)
-        func(*args, **kwargs)
-        network_lock.release()
+        print("network_lock acquired")
+        try:
+            func(*args, **kwargs)
+            network_lock.release()
+            print("network_lock released")
+        except:
+            network_lock.release()
+            print("network_lock released")
+            raise
     return wrapper
 
 
