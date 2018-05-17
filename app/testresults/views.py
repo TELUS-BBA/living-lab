@@ -7,7 +7,7 @@ from testresults.models import Iperf3Result, PingResult
 from testresults.serializers import Iperf3ResultSerializer, PingResultSerializer
 
 
-class PingResultPagination(CursorPagination):
+class TestResultPagination(CursorPagination):
     page_size = 100
     ordering = 'id'
 
@@ -16,13 +16,14 @@ class Iperf3ResultViewSet(ModelViewSet):
     queryset = Iperf3Result.objects.all()
     serializer_class = Iperf3ResultSerializer
     permission_classes = (DjangoModelPermissions,)
+    pagination_class = TestResultPagination
 
 
 class PingResultViewSet(ModelViewSet):
     queryset = PingResult.objects.all()
     serializer_class = PingResultSerializer
     permission_classes = (DjangoModelPermissions,)
-    pagination_class = PingResultPagination
+    pagination_class = TestResultPagination
 
     def create(self, request, *args, **kwargs):
         is_list = isinstance(request.data, list)
