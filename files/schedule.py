@@ -8,9 +8,7 @@ import time
 import requests
 from requests.auth import HTTPBasicAuth
 import json
-from subprocess import Popen, PIPE, STDOUT
-import re
-from datetime import datetime
+from subprocess import check_call, DEVNULL, STDOUT, CalledProcessError
 import threading
 import argparse
 from copy import copy
@@ -110,12 +108,12 @@ def intense_test(info, iperf_host, iperf_port, post_url):
 def continuous_test(info, host, results):
     print("Running continuous test at {}".format(maya.now().rfc2822()))
     cmd = ["ping", "-c", "1", "-W", "1", host]
-    process = Popen(cmd, stdin=None, stdout=PIPE, stderr=STDOUT)
-    process.wait(timeout=2)
-    if process.returncode == 0:
-        state = 'up'
-    else:
+    try:
+        check_call(cmd, timeout=2, stdin=None, stdout=DEVNULL, stderr=STDOUT)
+    except CalledProcessError:
         state = 'down'
+    else:
+        state = 'up'
     results.append({
         'nanopi': info.get('id'),
         'time': maya.now().rfc3339(),

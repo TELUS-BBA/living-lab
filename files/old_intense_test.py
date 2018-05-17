@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+import re
+
 def run_iperf_test(host, port, test_func):
     with socket.create_connection((host, port), 2) as s:
         s.sendall("SENDPORT\r\n".encode())
