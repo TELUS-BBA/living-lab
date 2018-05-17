@@ -163,11 +163,12 @@ if __name__ == "__main__":
     scheduler = BlockingScheduler()
 #    scheduler.add_job(intense_test, args=(info, args.test_host, args.iperf_port, full_intense_result_path),
 #                      trigger='cron', hour='*/1', minute=args.intense_test_minute)
-    scheduler.add_job(continuous_test, args=(info, args.test_host, continuous_test_results),
+    scheduler.add_job(continuous_test, args=(info, args.test_host, continuous_test_results), coalesce=True,
                       trigger='cron', second='*/2')
     scheduler.add_job(continuous_test_upload,
                       args=(info, args.management_host, args.management_port, args.ping_result_path,
                             continuous_test_results),
+                      coalesce=True,
                       trigger='cron', minute='*/5')
     print("Starting scheduler...")
     try:
