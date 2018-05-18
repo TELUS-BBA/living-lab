@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'provisioning',
     'testresults',
     'rest_framework',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
