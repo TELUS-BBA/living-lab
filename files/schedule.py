@@ -138,9 +138,11 @@ def continuous_test(info, host, results):
 def continuous_test_upload(info, host, port, location, results):
     print("Running continuous test upload at {}".format(maya.now().rfc2822()))
     list_to_upload = copy(results)
-    results.clear()
     upload_url = "http://{}:{}{}".format(host, port, location)
     response = requests.post(upload_url, json=list_to_upload, auth=HTTPBasicAuth(info.get('username'), info.get('password')))
+    response.raise_for_status()
+    # if an exception is raised before this point the below code will be skipped
+    del results[0:len(list_to_upload)]
     return response
 
 
