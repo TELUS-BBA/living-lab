@@ -4,8 +4,8 @@ from rest_framework.permissions import DjangoModelPermissions
 from rest_framework.response import Response
 from rest_framework.pagination import CursorPagination
 from django_filters import rest_framework as filters
-from testresults.models import Iperf3Result, PingResult
-from testresults.serializers import Iperf3ResultSerializer, PingResultSerializer
+from testresults.models import Iperf3Result, PingResult, SockPerfResult
+from testresults.serializers import Iperf3ResultSerializer, PingResultSerializer, SockPerfResultSerializer
 
 
 class TestResultPagination(CursorPagination):
@@ -40,6 +40,18 @@ class PingResultFilter(filters.FilterSet):
         }
 
 
+class SockPerfResultFilter(filters.FilterSet):
+    class Meta:
+        model = SockPerfResult
+        fields = {
+            'id': ['exact'],
+            'nanopi': ['exact'],
+            'latency': ['exact', 'lt', 'gt'],
+            'upload_date': ['exact', 'month', 'month__gt', 'month__lt', 'day', 'day__gt', 'day__lt',
+                            'hour', 'hour__gt', 'hour__lt'],
+        }
+
+
 class Iperf3ResultViewSet(ModelViewSet):
     queryset = Iperf3Result.objects.all()
     serializer_class = Iperf3ResultSerializer
@@ -66,3 +78,11 @@ class PingResultViewSet(ModelViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+class SockPerfResultViewSet(ModelViewSet):
+    queryset = SockPerfResult.objects.all()
+    serializer_class = SockPerfResultSerializer
+    permission_classes = (DjangoModelPermissions,)
+    pagination_class = TestResultPagination
+    filter_backends = (filters.DjangoFilterBackend,)
+    filter_class = SockPerfResultFilter

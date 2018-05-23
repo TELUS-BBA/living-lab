@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
 from provisioning.views import NanoPiViewSet
-from testresults.views import Iperf3ResultViewSet, PingResultViewSet
+from testresults.views import Iperf3ResultViewSet, PingResultViewSet, SockPerfResultViewSet
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -27,5 +27,6 @@ router = routers.DefaultRouter()
 router.register(r'nanopi', NanoPiViewSet)
 router.register(r'iperf3', Iperf3ResultViewSet)
 router.register(r'ping', PingResultViewSet)
+router.register(r'sockperf', SockPerfResultViewSet)
 
 urlpatterns += router.urls

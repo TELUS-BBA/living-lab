@@ -1,4 +1,4 @@
-from testresults.models import Iperf3Result, PingResult
+from testresults.models import Iperf3Result, PingResult, SockPerfResult
 from rest_framework import serializers
 
 
@@ -14,3 +14,10 @@ class PingResultSerializer(serializers.ModelSerializer):
     class Meta:
         model = PingResult
         fields = ['id', 'nanopi', 'state', 'time', 'upload_date']
+
+
+class SockPerfResultSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = SockPerfResult
+        fields = ['id', 'nanopi', 'latency', 'upload_date']
