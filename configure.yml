@@ -52,6 +52,12 @@
         dest: /home/nanopi/schedule.py
         mode: 0700
 
+    - name: copy sockperf binary into place
+      copy:
+        src: files/sockperf
+        dest: /home/nanopi/sockperf
+        mode: 0700
+
     - name: copy scheduled-testing.service to systemd directory
       become: true
       template:
