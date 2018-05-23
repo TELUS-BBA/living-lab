@@ -137,8 +137,8 @@ def intense_test(info, iperf_host, iperf_port, sockperf_path, sockperf_host, soc
     
 
 @check_lock_nonblocking
-def continuous_test(info, host, results):
-    print("Running continuous test at {}".format(maya.now().rfc2822()))
+def ping_test(info, host, results):
+    print("Running ping test at {}".format(maya.now().rfc2822()))
     cmd = ["ping", "-c", "1", "-W", "1", host]
     try:
         check_call(cmd, timeout=2, stdin=None, stdout=DEVNULL, stderr=STDOUT)
@@ -159,8 +159,8 @@ def continuous_test(info, host, results):
     
 
 @check_lock_blocking
-def continuous_test_upload(info, upload_url, results):
-    print("Running continuous test upload at {}".format(maya.now().rfc2822()))
+def ping_test_upload(info, upload_url, results):
+    print("Running ping test upload at {}".format(maya.now().rfc2822()))
     list_to_upload = copy(results)
     response = requests.post(upload_url, json=list_to_upload, auth=HTTPBasicAuth(info.get('username'), info.get('password')))
     response.raise_for_status()
@@ -177,20 +177,20 @@ def continuous_test_upload(info, upload_url, results):
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('test_host')
-    parser.add_argument('iperf_port')
-    parser.add_argument('sockperf_port')
-    parser.add_argument('management_host')
-    parser.add_argument('management_port')
-    parser.add_argument('info_path')
-    parser.add_argument('ping_result_path')
-    parser.add_argument('iperf3_result_path')
-    parser.add_argument('sockperf_result_path')
-    parser.add_argument('intense_test_minute')
+    parser.add_argument('test_host', help="The ip address or domain name of the testing server")
+    parser.add_argument('iperf_port', help="The testing server port that iperf3 is listening on")
+    parser.add_argument('sockperf_port', help="The testing server port that sockperf is listening on")
+    parser.add_argument('management_host', help="The ip address or domain name of the management server")
+    parser.add_argument('management_port', help="The port that is used to access the management server")
+    parser.add_argument('info_path', help="The local path of the info file")
+    parser.add_argument('ping_result_path', help="The path on the server that ping results are posted to")
+    parser.add_argument('iperf3_result_path', help="The path on the server that iperf3 results are posted to")
+    parser.add_argument('sockperf_result_path', help="The path on the server that sockperf results are posted to")
+    parser.add_argument('intense_test_minute', help="The minute of each hour that the intense test runs")
     args = parser.parse_args()
 
     network_lock = threading.Lock()
-    continuous_test_results = []
+    ping_test_results = []
     info = get_nanopi_info(args.info_path)
     full_iperf3_result_url = "http://{}:{}{}".format(args.management_host, args.management_port,
                                                      args.iperf3_result_path)
@@ -204,10 +204,10 @@ if __name__ == "__main__":
                       args=(info, args.test_host, args.iperf_port, "/home/nanopi/sockperf", args.test_host,
                             args.sockperf_port, full_iperf3_result_url, full_sockperf_result_url),
                       trigger='cron', hour='*/1', minute=args.intense_test_minute)
-    scheduler.add_job(continuous_test, args=(info, args.test_host, continuous_test_results), coalesce=True,
+    scheduler.add_job(ping_test, args=(info, args.test_host, ping_test_results), coalesce=True,
                       trigger='cron', second='*/2')
-    scheduler.add_job(continuous_test_upload,
-                      args=(info, full_ping_result_url, continuous_test_results),
+    scheduler.add_job(ping_test_upload,
+                      args=(info, full_ping_result_url, ping_test_results),
                       coalesce=True,
                       trigger='cron', minute='*/5')
     print("Starting scheduler...")
