@@ -1,0 +1,15 @@
+---
+management_host: 
+nanopi_provisioning_path: 
+admin_user: 
+admin_pass: 
+
+test_host: 
+iperf_port: 
+sockperf_port: 
+management_host_tunnel: 
+management_port_tunnel: 
+info_path: 
+ping_result_path: 
+iperf3_result_path: 
+sockperf_result_path: 
