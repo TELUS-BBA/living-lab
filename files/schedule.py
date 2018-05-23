@@ -9,9 +9,11 @@ import requests
 from requests.auth import HTTPBasicAuth
 import json
 from subprocess import check_call, DEVNULL, STDOUT, CalledProcessError
+from subprocess import run, check_call, CalledProcessError, PIPE, STDOUT, DEVNULL
 import threading
 import argparse
 from copy import copy
+import re
 
 
 def get_nanopi_info(path):
@@ -86,25 +88,47 @@ def test_jitter(host, port):
     test_client.protocol = 'udp'
     result = do_iperf_test(host, port, test_client)
     return result.jitter_ms
+
+
+def test_latency(sockperf_path, host, port):
+    regex = re.compile(r'^sockperf: Summary: Latency is ([0-9.]+) usec')
+    cmd = [sockperf_path, 'ping-pong', '-i', host, '-p', str(port)]
+    result = run(cmd, stdin=None, stdout=PIPE, stderr=STDOUT)
+    lines = result.stdout.decode().split('\n')
+    for line in lines:
+        match = regex.search(line)
+        if match:
+            return float(match.group(1))
+    raise re.error("No lines in the stdout of sockperf ping-pong matched the regex")
         
 
 @check_lock_blocking
-def intense_test(info, iperf_host, iperf_port, post_url):
+def intense_test(info, iperf_host, iperf_port, sockperf_path, sockperf_host, sockperf_port,
+                 iperf3_post_url, sockperf_post_url):
     print("Running intense test at {}".format(maya.now().rfc2822()))
     up_result = test_up(iperf_host, iperf_port)
     down_result = test_down(iperf_host, iperf_port)
+    latency_result = test_latency(sockperf_path, sockperf_host, sockperf_port)
     up_data = {
         'nanopi': info.get('id'),
         'direction': 'up',
         'bandwidth': up_result,
     }
-    response = requests.post(post_url, json=up_data, auth=HTTPBasicAuth(info.get('username'), info.get('password')))
+    response = requests.post(iperf3_post_url, json=up_data,
+                             auth=HTTPBasicAuth(info.get('username'), info.get('password')))
     down_data = {
         'nanopi': info.get('id'),
         'direction': 'down',
         'bandwidth': down_result,
     }
-    response = requests.post(post_url, json=down_data, auth=HTTPBasicAuth(info.get('username'), info.get('password')))
+    response = requests.post(iperf3_post_url, json=down_data,
+                             auth=HTTPBasicAuth(info.get('username'), info.get('password')))
+    latency_data = {
+        'nanopi': info.get('id'),
+        'latency': latency_result,
+    }
+    response = requests.post(sockperf_post_url, json=latency_data,
+                             auth=HTTPBasicAuth(info.get('username'), info.get('password')))
 
 
 # ---------------------------------------------------------------------
@@ -135,10 +159,9 @@ def continuous_test(info, host, results):
     
 
 @check_lock_blocking
-def continuous_test_upload(info, host, port, location, results):
+def continuous_test_upload(info, upload_url, results):
     print("Running continuous test upload at {}".format(maya.now().rfc2822()))
     list_to_upload = copy(results)
-    upload_url = "http://{}:{}{}".format(host, port, location)
     response = requests.post(upload_url, json=list_to_upload, auth=HTTPBasicAuth(info.get('username'), info.get('password')))
     response.raise_for_status()
     # if an exception is raised before this point the below code will be skipped
@@ -156,28 +179,35 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('test_host')
     parser.add_argument('iperf_port')
+    parser.add_argument('sockperf_port')
     parser.add_argument('management_host')
     parser.add_argument('management_port')
     parser.add_argument('info_path')
     parser.add_argument('ping_result_path')
-    parser.add_argument('intense_result_path')
+    parser.add_argument('iperf3_result_path')
+    parser.add_argument('sockperf_result_path')
     parser.add_argument('intense_test_minute')
     args = parser.parse_args()
 
     network_lock = threading.Lock()
     continuous_test_results = []
     info = get_nanopi_info(args.info_path)
-    full_intense_result_path = "http://{}:{}{}".format(args.management_host, args.management_port, args.intense_result_path)
-    full_ping_path = "http://{}:{}{}".format(args.management_host, args.management_port, args.ping_result_path)
+    full_iperf3_result_url = "http://{}:{}{}".format(args.management_host, args.management_port,
+                                                     args.iperf3_result_path)
+    full_sockperf_result_url = "http://{}:{}{}".format(args.management_host, args.management_port,
+                                                       args.sockperf_result_path)
+    full_ping_result_url = "http://{}:{}{}".format(args.management_host, args.management_port,
+                                                   args.ping_result_path)
 
     scheduler = BlockingScheduler()
-#    scheduler.add_job(intense_test, args=(info, args.test_host, args.iperf_port, full_intense_result_path),
-#                      trigger='cron', hour='*/1', minute=args.intense_test_minute)
+    scheduler.add_job(intense_test,
+                      args=(info, args.test_host, args.iperf_port, "/home/nanopi/sockperf", args.test_host,
+                            args.sockperf_port, full_iperf3_result_url, full_sockperf_result_url),
+                      trigger='cron', hour='*/1', minute=args.intense_test_minute)
     scheduler.add_job(continuous_test, args=(info, args.test_host, continuous_test_results), coalesce=True,
                       trigger='cron', second='*/2')
     scheduler.add_job(continuous_test_upload,
-                      args=(info, args.management_host, args.management_port, args.ping_result_path,
-                            continuous_test_results),
+                      args=(info, full_ping_result_url, continuous_test_results),
                       coalesce=True,
                       trigger='cron', minute='*/5')
     print("Starting scheduler...")
