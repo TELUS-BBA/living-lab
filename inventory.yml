@@ -1,21 +1,5 @@
 ---
-# EXAMPLE
-#all:
-#  children:
-#    management:
-#      hosts:
-#        123.456.789.123
-#    testing:
-#      hosts:
-#        123.456.789.123
-#    nanopis:
-#      hosts:
-#        123.456.789.123
-#        123.456.789.123
-#        123.456.789.123
-#        123.456.789.123
 all:
-
   hosts:
 
     localhost:
@@ -38,8 +22,12 @@ all:
     testing:
       ansible_host: 
       ansible_user: 
-      # the port that the iperf3 server listens on
+      # the port that the iperf3-mux server listens on
       iperf_port: 
+      # minimum port that the iperf3-mux server will start an iperf server on
+      min_iperf_port:
+      # maximum port that the iperf3-mux server will start an iperf server on
+      max_iperf_port:
       # the port that the sockperf server listens on
       sockperf_port: 
 

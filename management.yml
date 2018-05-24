@@ -1,4 +1,5 @@
 ---
 - name: deploys the management server
   hosts: management
-  roles: management
+  roles:
+    - management

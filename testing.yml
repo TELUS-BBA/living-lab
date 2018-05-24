@@ -1,2 +1,5 @@
 ---
 - name: deploys the testing server
+  hosts: testing
+  roles:
+    - testing
