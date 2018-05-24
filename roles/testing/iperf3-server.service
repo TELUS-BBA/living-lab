@@ -1,0 +1,11 @@
+[Unit]
+Description=iperf3-mux server
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/twistd --nodaemon --pidfile= -y /home/adam/testing-server/server.py
+RestartSec=3
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

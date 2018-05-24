@@ -1,2 +1,2 @@
-# living-lab-server
-code for the server of the living lab
+# living-lab
+This repo contains code and configurations for the living lab.

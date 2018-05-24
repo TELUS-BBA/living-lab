@@ -1,0 +1,61 @@
+---
+# EXAMPLE
+#all:
+#  children:
+#    management:
+#      hosts:
+#        123.456.789.123
+#    testing:
+#      hosts:
+#        123.456.789.123
+#    nanopis:
+#      hosts:
+#        123.456.789.123
+#        123.456.789.123
+#        123.456.789.123
+#        123.456.789.123
+all:
+
+  hosts:
+
+    localhost:
+      ansible_connection: local
+
+    management:
+      ansible_host: 
+      ansible_user: 
+      # the port that the management server listens on
+      management_port:
+      # the url path used to provision nanopis
+      nanopi_provisioning_path: 
+      # the url path where ping results are POSTed
+      ping_result_path: 
+      # the url path where iperf3 results are POSTed
+      iperf3_result_path: 
+      # the url path where sockperf results are POSTed
+      sockperf_result_path: 
+
+    testing:
+      ansible_host: 
+      ansible_user: 
+      # the port that the iperf3 server listens on
+      iperf_port: 
+      # the port that the sockperf server listens on
+      sockperf_port: 
+
+  children:
+
+    nanopis:
+      vars:
+        ansible_user: 
+        # the host name of the tunnel through which nanopis access the management server
+        management_host_tunnel: 
+        # the port of the tunnel through which nanopis access the management server
+        management_port_tunnel: 
+        # the local path of the info file
+        info_path: 
+        # the admin username (required for provisioning nanopi with the server)
+        admin_user: 
+        # the admin password (required for provisioning nanopi with the server)
+        admin_pass: 
+      hosts:
