@@ -15,6 +15,7 @@
         - python3-pip
         - uwsgi
         - uwsgi-plugin-python3
+        - rsync
 
     - name: ensure pip3 packages are present
       become: true

@@ -1,9 +1,21 @@
 ---
-- name: clone living-lab-server github repo
-  git:
-    repo: https://github.com/adamkpickering/living-lab-server.git
-    dest: /home/{{ ansible_user }}/management/
-    force: true
+- name: ensure management directory exists
+  file:
+    path: /home/{{ ansible_user }}/management/
+    state: directory
+
+- name: put config files in place
+  template:
+    src: "{{ item }}"
+    dest: /home/{{ ansible_user }}/management/{{ item }}
+  loop:
+    - uwsgi.ini
+    - uwsgi_params
+
+- name: synchronize django project with management directory
+  synchronize:
+    src: src/app/
+    dest: /home/{{ ansible_user }}/management/app/
 
 - name: ensure we have DEBUG = False in settings.py
   lineinfile:
@@ -41,11 +53,10 @@
   shell: echo "from django.contrib.auth.models import User; User.objects.create_superuser('admin', 'admin@example.com', 'admin')" | /home/{{ ansible_user }}/management/app/manage.py shell
   when: checksuperuser.rc != 0
 
-- name: link between uwsgi.service and /etc/systemd/system/uwsgi.service
+- name: copy uwsgi.service into place
   become: true
-  file:
-    state: link
-    src: /home/{{ ansible_user }}/management/uwsgi.service
+  template:
+    src: uwsgi.service
     dest: /etc/systemd/system/uwsgi.service
 
 - name: enable and start uwsgi
@@ -56,11 +67,10 @@
     state: restarted
     daemon_reload: yes
 
-- name: link between nginx-app.conf and /etc/nginx/sites-enabled/default
+- name: copy nginx-app.conf into place
   become: true
-  file:
-    state: link
-    src: /home/{{ ansible_user }}/management/nginx-app.conf
+  template:
+    src: nginx-app.conf
     dest: /etc/nginx/sites-enabled/default
 
 - name: enable and start nginx
