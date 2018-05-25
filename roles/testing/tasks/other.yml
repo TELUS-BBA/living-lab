@@ -21,41 +21,41 @@
 
 - name: create testing-server folder
   file:
-    path: /home/adam/testing-server
+    path: /home/{{ ansible_user }}/testing-server
     state: directory
 
 - name: copy server.py to server
   copy:
     src: server.py
-    dest: /home/adam/testing-server/server.py
+    dest: /home/{{ ansible_user }}/testing-server/server.py
 
 - name: ensure correct SERVER_PORT line is in file
   lineinfile:
-    path: /home/adam/testing-server/server.py
+    path: /home/{{ ansible_user }}/testing-server/server.py
     regexp: '^SERVER_PORT = '
     line: 'SERVER_PORT = {{ iperf_port }}'
 
 - name: ensure correct IPERF#_SERVER_PORT_MIN line is in file
   lineinfile:
-    path: /home/adam/testing-server/server.py
+    path: /home/{{ ansible_user }}/testing-server/server.py
     regexp: '^IPERF3_SERVER_PORT_MIN = '
     line: 'IPERF3_SERVER_PORT_MIN = {{ min_iperf_port }}'
 
 - name: ensure correct IPERF#_SERVER_PORT_MAX line is in file
   lineinfile:
-    path: /home/adam/testing-server/server.py
+    path: /home/{{ ansible_user }}/testing-server/server.py
     regexp: '^IPERF3_SERVER_PORT_MAX = '
     line: 'IPERF3_SERVER_PORT_MAX = {{ max_iperf_port }}'
 
 - name: copy sockperf to server
   copy:
     src: sockperf-x86-64
-    dest: /home/adam/testing-server/sockperf
+    dest: /home/{{ ansible_user }}/testing-server/sockperf
     mode: 0775
 
 - name: copy iperf3-server.service to /etc/systemd/system/iperf3-server.service
   become: true
-  copy:
+  template:
     src: iperf3-server.service
     dest: /etc/systemd/system/iperf3-server.service
     mode: 0777

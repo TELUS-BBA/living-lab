@@ -3,7 +3,7 @@ Description=sockperf server
 After=network.target
 
 [Service]
-ExecStart=/home/adam/testing-server/sockperf server -p {{ sockperf_port }}
+ExecStart=/home/{{ ansible_user }}/testing-server/sockperf server -p {{ sockperf_port }}
 RestartSec=3
 Restart=always
 
