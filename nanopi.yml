@@ -1,2 +1,6 @@
 ---
 - name: deploys nanopis
+  hosts: nanopis
+  gather_facts: false
+  roles:
+    - nanopi

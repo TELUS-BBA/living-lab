@@ -1,0 +1,33 @@
+---
+- name: generate random number between 0 and 59, which is when intense tests will run
+  script: files/generate_minute.py
+  register: test_time
+
+- name: copy schedule.py into place
+  copy:
+    src: files/schedule.py
+    dest: /home/{{ ansible_user }}/schedule.py
+    mode: 0700
+
+- name: copy sockperf binary into place
+  copy:
+    src: sockperf-aarch64
+    dest: /home/{{ ansible_user }}/sockperf
+    mode: 0700
+
+- name: copy scheduled-testing.service to systemd directory
+  become: true
+  template:
+    src: scheduled-testing.service
+    dest: /etc/systemd/system/scheduled-testing.service
+
+- name: enable and start scheduled-testing.service
+  become: true
+  systemd:
+    name: scheduled-testing
+    enabled: true
+    state: restarted
+    daemon_reload: true
+  notify:
+    - shutdown nanopi
+    - wait for nanopi to come back up
