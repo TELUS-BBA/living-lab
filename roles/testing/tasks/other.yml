@@ -35,13 +35,13 @@
     regexp: '^SERVER_PORT = '
     line: 'SERVER_PORT = {{ iperf_port }}'
 
-- name: ensure correct IPERF#_SERVER_PORT_MIN line is in file
+- name: ensure correct IPERF3_SERVER_PORT_MIN line is in file
   lineinfile:
     path: /home/{{ ansible_user }}/testing-server/server.py
     regexp: '^IPERF3_SERVER_PORT_MIN = '
     line: 'IPERF3_SERVER_PORT_MIN = {{ min_iperf_port }}'
 
-- name: ensure correct IPERF#_SERVER_PORT_MAX line is in file
+- name: ensure correct IPERF3_SERVER_PORT_MAX line is in file
   lineinfile:
     path: /home/{{ ansible_user }}/testing-server/server.py
     regexp: '^IPERF3_SERVER_PORT_MAX = '
