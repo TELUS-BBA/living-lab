@@ -3,7 +3,7 @@ Description=uWSGI Server
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/uwsgi --ini /home/adam/management/uwsgi.ini
+ExecStart=/usr/bin/uwsgi --ini /home/{{ ansible_user }}/management/uwsgi.ini
 # Requires systemd version 211 or newer
 RuntimeDirectory=uwsgi
 Restart=always
