@@ -1,0 +1,76 @@
+---
+- name: ensure /home/nanopi/.ssh/ exists
+  file:
+    path: /home/nanopi/.ssh
+    state: directory
+    mode: 0700
+
+- name: put the server's key in authorized_keys
+  copy:
+    src: /home/adam/.ssh/server_keys/id_rsa.pub
+    dest: /home/nanopi/.ssh/authorized_keys
+    mode: 0600
+
+- name: copy client public key to nanopi
+  copy:
+    src: /home/adam/.ssh/id_rsa.pub
+    dest: /home/nanopi/.ssh/id_rsa.pub
+    mode: 0644
+
+- name: copy client private key to nanopi
+  copy:
+    src: /home/adam/.ssh/id_rsa
+    dest: /home/nanopi/.ssh/id_rsa
+    mode: 0600
+
+- name: copy known_hosts to nanopi
+  copy:
+    src: known_hosts
+    dest: /home/nanopi/.ssh/known_hosts
+    mode: 0600
+
+- name: copy local-tunnel.service to systemd directory
+  become: true
+  template:
+    src: local-tunnel.service
+    dest: /etc/systemd/system/local-tunnel.service
+
+- name: enable and start local tunnel
+  become: true
+  systemd:
+    name: local-tunnel
+    enabled: true
+    state: restarted
+    daemon_reload: true
+  notify:
+    - shutdown nanopi
+    - wait for nanopi to come back up
+
+- name: provision nanopi
+  script: >
+    provision_nanopi.py {{ admin_user }} {{ admin_pass }}
+    {{ management_host_tunnel }} {{ management_port_tunnel }} {{ nanopi_provisioning_path }}
+  register: provision_result
+
+- name: ensure proper permissions are set for /home/nanopi/info file
+  file:
+    path: /home/nanopi/info
+    state: file
+    mode: 0600
+
+- name: copy remote-tunnel.service to systemd directory
+  become: true
+  template:
+    src: remote-tunnel.service
+    dest: /etc/systemd/system/remote-tunnel.service
+
+- name: enable and start remote tunnel
+  become: true
+  systemd:
+    name: remote-tunnel
+    enabled: true
+    state: restarted
+    daemon_reload: true
+  notify:
+    - shutdown nanopi
+    - wait for nanopi to come back up

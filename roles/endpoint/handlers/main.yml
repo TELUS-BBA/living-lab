@@ -1,0 +1,13 @@
+---
+- name: shutdown nanopi
+  become: true
+  shell: sleep 3 && shutdown now -r
+  async: 1
+  poll: 0
+  ignore_errors: true
+
+- name: wait for nanopi to come back up
+  wait_for_connection:
+    delay: 10
+    sleep: 2
+    timeout: 60

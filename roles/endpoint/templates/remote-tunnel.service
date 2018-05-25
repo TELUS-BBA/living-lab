@@ -1,0 +1,14 @@
+[Unit]
+Description=SSH remote tunnel
+ConditionPathExists=|/usr/bin
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=nanopi
+ExecStart=/usr/bin/ssh -TN -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 -o ServerAliveCountMax=3 -p 22 -i /home/{{ ansible_user }}/.ssh/id_rsa -R localhost:{{ provision_result.stdout_lines[0] }}:localhost:22 {{ hostvars['management']['ansible_user'] }}@{{ hostvars['management']['ansible_host'] }}
+RestartSec=3
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

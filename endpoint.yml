@@ -1,0 +1,6 @@
+---
+- name: base nanopi config (ssh tunnels and provisioning with management server)
+  hosts: nanopis
+  gather_facts: false
+  roles:
+    - endpoint
