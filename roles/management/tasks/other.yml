@@ -1,4 +1,17 @@
 ---
+- name: clean local src/app of db and migrations
+  local_action:
+    module: file
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - src/app/db.sqlite3
+    - src/app/testresults/migrations
+    - src/app/testresults/__pycache__
+    - src/app/provisioning/migrations
+    - src/app/provisioning/__pycache__
+    - src/app/livinglabserver/__pycache__
+
 - name: ensure management directory exists
   file:
     path: /home/{{ ansible_user }}/management/
@@ -28,30 +41,30 @@
     path: /home/{{ ansible_user }}/management/logs/
     state: directory
 
-- name: run django's makemigrations
-  django_manage:
-    command: makemigrations
-    app_path: /home/{{ ansible_user }}/management/app/
-
-- name: run django's migrate
-  django_manage:
-    command: migrate
-    app_path: /home/{{ ansible_user }}/management/app/
+  #- name: run django's makemigrations
+  #  django_manage:
+  #    command: makemigrations
+  #    app_path: /home/{{ ansible_user }}/management/app/
+  #
+  #- name: run django's migrate
+  #  django_manage:
+  #    command: migrate
+  #    app_path: /home/{{ ansible_user }}/management/app/
 
 - name: run django's collectstatic
   django_manage:
     command: collectstatic
     app_path: /home/{{ ansible_user }}/management/app/
 
-- name: check if django superuser exists
-  shell: echo "import sys; from django.contrib.auth.models import User; sys.exit(0 if User.objects.filter(username='admin').count() > 0 else 1)" | /home/{{ ansible_user }}/management/app/manage.py shell
-  register: checksuperuser
-  ignore_errors: true
-  changed_when: false
-
-- name: create a django superuser
-  shell: echo "from django.contrib.auth.models import User; User.objects.create_superuser('admin', 'admin@example.com', 'admin')" | /home/{{ ansible_user }}/management/app/manage.py shell
-  when: checksuperuser.rc != 0
+  #- name: check if django superuser exists
+  #  shell: echo "import sys; from django.contrib.auth.models import User; sys.exit(0 if User.objects.filter(username='admin').count() > 0 else 1)" | /home/{{ ansible_user }}/management/app/manage.py shell
+  #  register: checksuperuser
+  #  ignore_errors: true
+  #  changed_when: false
+  #
+  #- name: create a django superuser
+  #  shell: echo "from django.contrib.auth.models import User; User.objects.create_superuser('admin', 'admin@example.com', 'admin')" | /home/{{ ansible_user }}/management/app/manage.py shell
+  #  when: checksuperuser.rc != 0
 
 - name: copy uwsgi.service into place
   become: true
