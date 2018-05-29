@@ -5,7 +5,7 @@ from provisioning.models import NanoPi
 class Iperf3Result(models.Model):
     nanopi = models.ForeignKey(NanoPi, on_delete=models.CASCADE)
     direction = models.CharField(max_length=20, choices=(('up', 'up'), ('down', 'down'),))
-    bandwidth = models.DecimalField(max_digits=10, decimal_places=3)
+    bandwidth = models.FloatField()
     upload_date = models.DateTimeField(auto_now_add=True)
 
 
@@ -18,5 +18,5 @@ class PingResult(models.Model):
 
 class SockPerfResult(models.Model):
     nanopi = models.ForeignKey(NanoPi, on_delete=models.CASCADE)
-    latency = models.DecimalField(max_digits=10, decimal_places=3)
+    latency = models.FloatField()
     upload_date = models.DateTimeField(auto_now_add=True)
