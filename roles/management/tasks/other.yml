@@ -1,17 +1,4 @@
 ---
-- name: clean local src/app of db and migrations
-  local_action:
-    module: file
-    path: "{{ item }}"
-    state: absent
-  loop:
-    - src/app/db.sqlite3
-    - src/app/testresults/migrations
-    - src/app/testresults/__pycache__
-    - src/app/provisioning/migrations
-    - src/app/provisioning/__pycache__
-    - src/app/livinglabserver/__pycache__
-
 - name: ensure management directory exists
   file:
     path: /home/{{ ansible_user }}/management/
@@ -25,10 +12,32 @@
     - uwsgi.ini
     - uwsgi_params
 
+- name: get local copy of living-lab-api repo
+  run_once: true
+  local_action:
+    module: git
+    repo: https://github.com/adamkpickering/living-lab-api.git
+    dest: tmp/
+    force: true
+
+- name: get local copy of living-lab-api repo
+  local_action:
+    module: git
+    repo: https://github.com/adamkpickering/living-lab-api.git
+    dest: tmp/
+    force: true
+
 - name: synchronize django project with management directory
   synchronize:
-    src: src/app/
+    src: tmp/
     dest: /home/{{ ansible_user }}/management/app/
+
+- name: delete tmp/ from local system
+  run_once: true
+  local_action:
+    module: file
+    path: tmp/
+    state: absent
 
 - name: ensure we have DEBUG = False in settings.py
   lineinfile:

@@ -1,4 +1,0 @@
-Django
-djangorestframework
-markdown
-django-filter
