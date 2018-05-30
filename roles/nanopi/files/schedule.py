@@ -104,10 +104,11 @@ def test_latency(sockperf_path, host, port):
 
 @check_lock_blocking
 def intense_test(info, iperf_host, iperf_port, sockperf_path, sockperf_host, sockperf_port,
-                 iperf3_post_url, sockperf_post_url):
+                 iperf3_post_url, sockperf_post_url, jitter_post_url):
     print("Running intense test at {}".format(maya.now().rfc2822()))
     up_result = test_up(iperf_host, iperf_port)
     down_result = test_down(iperf_host, iperf_port)
+    jitter_result = test_jitter(iperf_host, iperf_port)
     latency_result = test_latency(sockperf_path, sockperf_host, sockperf_port)
     up_data = {
         'nanopi': info.get('id'),
@@ -122,6 +123,12 @@ def intense_test(info, iperf_host, iperf_port, sockperf_path, sockperf_host, soc
         'bandwidth': down_result,
     }
     response = requests.post(iperf3_post_url, json=down_data,
+                             auth=HTTPBasicAuth(info.get('username'), info.get('password')))
+    jitter_data = {
+        'nanopi': info.get('id'),
+        'jitter': jitter_result,
+    }
+    response = requests.post(jitter_post_url, json=jitter_data,
                              auth=HTTPBasicAuth(info.get('username'), info.get('password')))
     latency_data = {
         'nanopi': info.get('id'),
@@ -185,6 +192,7 @@ if __name__ == "__main__":
     parser.add_argument('info_path', help="The local path of the info file")
     parser.add_argument('ping_result_path', help="The path on the server that ping results are posted to")
     parser.add_argument('iperf3_result_path', help="The path on the server that iperf3 results are posted to")
+    parser.add_argument('jitter_result_path', help="The path on the server that jitter results are posted to")
     parser.add_argument('sockperf_result_path', help="The path on the server that sockperf results are posted to")
     parser.add_argument('intense_test_minute', help="The minute of each hour that the intense test runs")
     args = parser.parse_args()
@@ -194,15 +202,17 @@ if __name__ == "__main__":
     info = get_nanopi_info(args.info_path)
     full_iperf3_result_url = "http://{}:{}{}".format(args.management_host, args.management_port,
                                                      args.iperf3_result_path)
+    full_jitter_result_url = "http://{}:{}{}".format(args.management_host, args.management_port,
+                                                   args.jitter_result_path)
     full_sockperf_result_url = "http://{}:{}{}".format(args.management_host, args.management_port,
                                                        args.sockperf_result_path)
     full_ping_result_url = "http://{}:{}{}".format(args.management_host, args.management_port,
                                                    args.ping_result_path)
-
     scheduler = BlockingScheduler()
     scheduler.add_job(intense_test,
                       args=(info, args.test_host, args.iperf_port, "/home/nanopi/sockperf", args.test_host,
-                            args.sockperf_port, full_iperf3_result_url, full_sockperf_result_url),
+                            args.sockperf_port, full_iperf3_result_url, full_sockperf_result_url,
+                            full_jitter_result_url),
                       trigger='cron', hour='*/1', minute=args.intense_test_minute)
     scheduler.add_job(ping_test, args=(info, args.test_host, ping_test_results), coalesce=True,
                       trigger='cron', second='*/2')

@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 User=nanopi
-ExecStart=/usr/bin/python3 -u /home/nanopi/schedule.py {{ hostvars['testing']['ansible_host'] }} {{ hostvars['testing']['iperf_port'] }} {{ hostvars['testing']['sockperf_port'] }} {{ management_host_tunnel }} {{ management_port_tunnel }} {{ info_path }} {{ ping_result_path }} {{ iperf3_result_path }} {{ sockperf_result_path }} {{ test_time.stdout_lines[0] }}
+ExecStart=/usr/bin/python3 -u /home/nanopi/schedule.py {{ hostvars['testing']['ansible_host'] }} {{ hostvars['testing']['iperf_port'] }} {{ hostvars['testing']['sockperf_port'] }} {{ management_host_tunnel }} {{ management_port_tunnel }} {{ info_path }} {{ ping_result_path }} {{ iperf3_result_path }} {{ jitter_result_path }} {{ sockperf_result_path }} {{ test_time.stdout_lines[0] }}
 RestartSec=3
 Restart=always
 

@@ -6,28 +6,22 @@ all:
       ansible_connection: local
 
     management:
-      ansible_host: 
+      ansible_host:
       ansible_user: 
-      # the port that the management server listens on
-      management_port:
-      # the url path used to provision nanopis
-      nanopi_provisioning_path: 
-      # the url path where ping results are POSTed
-      ping_result_path: 
-      # the url path where iperf3 results are POSTed
-      iperf3_result_path: 
-      # the url path where sockperf results are POSTed
-      sockperf_result_path: 
+      # the hostname that the management server listens on
+      management_host: 
+      # the local port that the management server listens on
+      management_port: 
 
     testing:
       ansible_host: 
       ansible_user: 
-      # the port that the iperf3-mux server listens on
+      # the port that the iperf3 server listens on
       iperf_port: 
       # minimum port that the iperf3-mux server will start an iperf server on
-      min_iperf_port:
+      min_iperf_port: 
       # maximum port that the iperf3-mux server will start an iperf server on
-      max_iperf_port:
+      max_iperf_port: 
       # the port that the sockperf server listens on
       sockperf_port: 
 
@@ -46,4 +40,14 @@ all:
         admin_user: 
         # the admin password (required for provisioning nanopi with the server)
         admin_pass: 
+        # the url path used to provision nanopis
+        nanopi_provisioning_path: 
+        # the url path where ping results are POSTed
+        ping_result_path: 
+        # the url path where iperf3 results are POSTed
+        iperf3_result_path: 
+        # the url path where jitter results are POSTed
+        jitter_result_path: 
+        # the url path where sockperf results are POSTed
+        sockperf_result_path: 
       hosts:
