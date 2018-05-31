@@ -14,6 +14,7 @@ parser.add_argument("password")
 parser.add_argument("hostname")
 parser.add_argument("port")
 parser.add_argument("nanopi_provisioning_path")
+parser.add_argument("info_path")
 args = parser.parse_args()
 
 API_HOST = "http://{}:{}{}".format(args.hostname, args.port, args.nanopi_provisioning_path)
@@ -45,7 +46,7 @@ response.raise_for_status()
 response_json = response.json()
 
 # write results to file
-with open('/home/nanopi/info', 'w+') as fd:
+with open(args.info_path, 'w+') as fd:
     response_json['username'] = username
     response_json['password'] = password
     fd.write(json.dumps(response_json))
