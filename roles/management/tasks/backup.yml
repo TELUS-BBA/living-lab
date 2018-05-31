@@ -1,0 +1,9 @@
+- name: ensure backup directory exists
+  file:
+    path: /home/{{ ansible_user }}/backup/
+    state: directory
+
+- cron:
+    name: local db backup
+    hour: 6 # in UTC ideally
+    job: rsync /home/{{ ansible_user }}/management/app/db.sqlite3 /home/{{ ansible_user }}/backup/db.sqlite3
