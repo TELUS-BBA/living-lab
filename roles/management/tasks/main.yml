@@ -2,3 +2,4 @@
 - import_tasks: install.yml
 - import_tasks: other.yml
 - import_tasks: backup.yml
+- import_tasks: ssh.yml

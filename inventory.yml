@@ -8,6 +8,10 @@ all:
     management:
       ansible_host:
       ansible_user: 
+      # local location of management public key (needed for role "management" only)
+      ssh_public_key_src:
+      # local location of management private key (needed for role "management" only)
+      ssh_private_key_src:
       # the hostname that the management server listens on
       management_host: 
       # the local port that the management server listens on
@@ -30,6 +34,10 @@ all:
     nanopis:
       vars:
         ansible_user: 
+        # local location of nanopi public key (needed for role "endpoint" only)
+        ssh_public_key_src:
+        # local location of nanopi private key (needed for role "endpoint" only)
+        ssh_private_key_src:
         # the host name of the tunnel through which nanopis access the management server
         management_host_tunnel: 
         # the port of the tunnel through which nanopis access the management server

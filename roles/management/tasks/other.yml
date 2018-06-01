@@ -20,13 +20,6 @@
     dest: tmp/
     force: true
 
-- name: get local copy of living-lab-api repo
-  local_action:
-    module: git
-    repo: https://github.com/adamkpickering/living-lab-api.git
-    dest: tmp/
-    force: true
-
 - name: synchronize django project with management directory
   synchronize:
     src: tmp/
@@ -99,27 +92,6 @@
   become: true
   systemd:
     name: nginx
-    enabled: true
-    state: restarted
-    daemon_reload: yes
-
-- name: put the client key in authorized_keys
-  copy:
-    src: /home/adam/.ssh/id_rsa.pub
-    dest: /home/{{ ansible_user }}/.ssh/authorized_keys
-    mode: 0600
-
-- name: ensure line "ClientAliveInterval 4" is in sshd_config
-  become: true
-  lineinfile:
-    path: /etc/ssh/sshd_config
-    regexp: "^ClientAliveInterval "
-    line: "ClientAliveInterval 4"
-
-- name: restart sshd
-  become: true
-  systemd:
-    name: sshd
     enabled: true
     state: restarted
     daemon_reload: yes

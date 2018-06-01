@@ -1,5 +1,6 @@
 ---
 - name: deploys the management server
   hosts: management
+  gather_facts: false
   roles:
     - management
