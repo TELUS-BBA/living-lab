@@ -12,8 +12,6 @@ all:
       ssh_public_key_src:
       # local location of management private key (needed for role "management" only)
       ssh_private_key_src:
-      # the hostname that the management server listens on
-      management_host: 
       # the local port that the management server listens on
       management_port: 
 

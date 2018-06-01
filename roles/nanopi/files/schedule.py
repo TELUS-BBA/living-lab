@@ -187,7 +187,7 @@ if __name__ == "__main__":
     parser.add_argument('test_host', help="The ip address or domain name of the testing server")
     parser.add_argument('iperf_port', help="The testing server port that iperf3 is listening on")
     parser.add_argument('sockperf_port', help="The testing server port that sockperf is listening on")
-    parser.add_argument('management_host', help="The ip address or domain name of the management server")
+    parser.add_argument('management_host', help="The hostname that is used to access the management server")
     parser.add_argument('management_port', help="The port that is used to access the management server")
     parser.add_argument('info_path', help="The local path of the info file")
     parser.add_argument('ping_result_path', help="The path on the server that ping results are posted to")
