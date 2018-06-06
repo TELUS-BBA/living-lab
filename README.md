@@ -64,14 +64,16 @@ There are two types of tests that NanoPis perform:
 ### Testing Server
 
 The testing server is the server that NanoPis test against.
-It hosts servers for various protocols (a modification of iperf3, sockperf).
+It hosts servers for various protocols
+(currently sockperf and a modification of iperf3 that allows for concurrent tests, called iperf3-mux).
 
 #### Requirements
 
 - apt
 - systemd
-- should be capable of serving the maximum bandwidth that several concurrent iperf3 tests will require;
-  otherwise your bandwidth results may be inaccurate
+- should be capable of serving the maximum bandwidth that the configured number of concurrent iperf3 tests
+  will require (see inventory variable `max_iperf_concurrent_tests`); otherwise your bandwidth results
+  may be inaccurate
 
 
 ### Management Server

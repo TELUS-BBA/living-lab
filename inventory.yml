@@ -24,6 +24,12 @@ all:
       min_iperf_port: 
       # maximum port that the iperf3-mux server will start an iperf server on
       max_iperf_port: 
+      # the maximum number of concurrent tests that the iperf3-mux server will support;
+      # past this number clients will be cleanly rejected;
+      # use this to ensure that you don't over-use the bandwidth of your server.
+      # For example if my server has 10Gbit/s of bandwidth and my clients are capable
+      # of generating 1Gbit/s during a test, I'd set this to 10 (or 9 to be safe)
+      max_iperf_concurrent_tests:
       # the port that the sockperf server listens on
       sockperf_port: 
 

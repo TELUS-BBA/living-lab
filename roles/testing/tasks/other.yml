@@ -27,6 +27,12 @@
     regexp: '^IPERF3_SERVER_PORT_MAX = '
     line: 'IPERF3_SERVER_PORT_MAX = {{ max_iperf_port }}'
 
+- name: ensure correct IPERF3_MAX_CONCURRENT_TESTS line is in file
+  lineinfile:
+    path: /home/{{ ansible_user }}/testing-server/server.py
+    regexp: '^IPERF3_MAX_CONCURRENT_TESTS = '
+    line: 'IPERF3_MAX_CONCURRENT_TESTS = {{ max_iperf_concurrent_tests }}'
+
 - name: copy sockperf to server
   copy:
     src: sockperf-x86-64

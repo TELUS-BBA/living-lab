@@ -14,6 +14,7 @@ from twisted.application import service, internet
 SERVER_PORT = 10000
 IPERF3_SERVER_PORT_MIN = 10001
 IPERF3_SERVER_PORT_MAX = 20000
+IPERF3_MAX_CONCURRENT_TESTS = 9
 
 
 class Iperf3ServerProcessProtocol(ProcessProtocol):
@@ -115,10 +116,10 @@ class Iperf3MuxServerFactory(Factory):
 #    log_file = sys.stdout # can be changed to whatever file descriptor you want
 #    globalLogPublisher.addObserver(FileLogObserver(log_file, formatEventAsClassicLogText))
 #    endpoint = TCP4ServerEndpoint(reactor, SERVER_PORT)
-#    endpoint.listen(Iperf3MuxServerFactory(3))
+#    endpoint.listen(Iperf3MuxServerFactory(IPERF3_MAX_CONCURRENT_TESTS))
 #    reactor.run()
 
 application = service.Application("Demo application")
-iperf3_server = Iperf3MuxServerFactory(3)
+iperf3_server = Iperf3MuxServerFactory(IPERF3_MAX_CONCURRENT_TESTS)
 my_service = internet.TCPServer(SERVER_PORT, iperf3_server)
 my_service.setServiceParent(application)
