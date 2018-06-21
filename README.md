@@ -21,12 +21,14 @@ This system is intended to carry out testing over a timeframe of weeks or months
 
 ### NanoPis
 
-For this trial we used NanoPi NEO2s from FriendlyArm, though any system that fits the requirements can be used.
+This system is made to work with NanoPi NEO2s from FriendlyArm,
+though any system that fits the requirements can be used.
 NanoPis are small SBCs that are similar to a Raspberry Pi, but smaller.
 They also have a gigabit ethernet port.
 In this use case, we ran Armbian on them.
 They can be placed behind a gateway, or on the public internet.
-All tests involve the connection between the NanoPi and the testing server.
+All tests are done from the NanoPi against the testing server;
+results from the tests are reported to the management server.
 There are two types of tests that NanoPis perform:
 
 - **Intense Tests:** These take place hourly at a time that is randomly chosen per NanoPi.
@@ -64,7 +66,7 @@ There are two types of tests that NanoPis perform:
 ### Testing Server
 
 The testing server is the server that NanoPis test against.
-It hosts servers for various protocols
+It runs servers for various protocols
 (currently sockperf and a modification of iperf3 that allows for concurrent tests, called iperf3-mux).
 
 #### Requirements
@@ -107,7 +109,7 @@ So, NanoPis are configured to set up two SSH tunnels:
   - ssh into each NanoPi to do manual configuration/maintenance
   - run Ansible playbooks from the management server that configure the NanoPis
     (because of undetermined reasons, possibly problems with tunnelling TCP over TCP, this
-    is about 95% effective - you may need to re-run playbooks in the event that a connection drops)
+    is about 95% effective - you may need to re-run playbooks in the event that a connection drops mid-playbook)
 
 When each NanoPi is provisioned (i.e. a profile is created for it in the API) it is assigned
 a unique primary key (id) by Django.
@@ -117,7 +119,7 @@ the primary key is used to calculate a unique port number according to the formu
 
     [remote tunnel port] = 6000 + [primary key]
 
-So if I have a NanoPi with an id (primary key) of 14,
+So if I have a NanoPi with a primary key of 14,
 I'll be able to ssh into it from the management server with the command
 
     ssh nanopi@localhost -p 6014
