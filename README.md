@@ -186,7 +186,7 @@ Then, follow this process:
         nanopis:
           vars:
             ansible_host: localhost
-            ansible_user: nanopi_user
+            ansible_user: [nanopi user name]
             ...
           hosts:
             nanopi1:
