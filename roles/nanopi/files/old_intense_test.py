@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 
 import re
+from subprocess import run, PIPE, STDOUT
+import socket
+from schedule import test_jitter as jitter
+
 
 def run_iperf_test(host, port, test_func):
     with socket.create_connection((host, port), 2) as s:
@@ -34,8 +38,25 @@ def test_down(iperf_host, iperf_port):
     return result
 
 
-def intense_test2(host, port):
-    print("testing up")
-    print(run_iperf_test(host, port, test_up))
-    print("testing down")
-    print(run_iperf_test(host, port, test_down))
+def test_jitter(iperf_host, iperf_port):
+    regex = re.compile('^\[SUM\].*\s([0-9]+\.[0-9]+) ms')
+    cmd = ['iperf3', '-c', iperf_host, '-p', str(iperf_port), '-P', '4', '-u']
+    result = run(cmd, stdin=None, stdout=PIPE, stderr=STDOUT)
+    lines = result.stdout.decode().split('\n')
+    for line in lines:
+        match = regex.search(line)
+        if match:
+            return float(match.group(1))
+    raise re.error("No lines in the stdout of iperf3 udp test matched the regex (looking for jitter)")
+
+
+def test_latency(sockperf_path, host, port):
+    regex = re.compile(r'^sockperf: Summary: Latency is ([0-9.]+) usec')
+    cmd = [sockperf_path, 'ping-pong', '-i', host, '-p', str(port)]
+    result = run(cmd, stdin=None, stdout=PIPE, stderr=STDOUT)
+    lines = result.stdout.decode().split('\n')
+    for line in lines:
+        match = regex.search(line)
+        if match:
+            return float(match.group(1))
+    raise re.error("No lines in the stdout of sockperf ping-pong matched the regex")

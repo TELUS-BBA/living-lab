@@ -8,7 +8,6 @@ import time
 import requests
 from requests.auth import HTTPBasicAuth
 import json
-from subprocess import check_call, DEVNULL, STDOUT, CalledProcessError
 from subprocess import run, check_call, CalledProcessError, PIPE, STDOUT, DEVNULL
 import threading
 import argparse
@@ -82,12 +81,19 @@ def test_down(host, port):
 
 
 def test_jitter(host, port):
-    test_client = iperf3.Client()
-    test_client.server_hostname = host
-    test_client.num_streams = 4
-    test_client.protocol = 'udp'
-    result = do_iperf_test(host, port, test_client)
-    return result.jitter_ms
+    with socket.create_connection((host, port), 2) as s:
+        s.sendall("SENDPORT\r\n".encode())
+        iperf_port = int(s.recv(4096).decode())
+        time.sleep(1)
+        regex = re.compile('^\[SUM\].*\s([0-9]+\.[0-9]+) ms')
+        cmd = ['iperf3', '-c', host, '-p', str(iperf_port), '-P', '4', '-u']
+        result = run(cmd, stdin=None, stdout=PIPE, stderr=STDOUT)
+        lines = result.stdout.decode().split('\n')
+        for line in lines:
+            match = regex.search(line)
+            if match:
+                return float(match.group(1))
+        raise re.error("No lines in the stdout of iperf3 udp test matched the regex (looking for jitter)")
 
 
 def test_latency(sockperf_path, host, port):
