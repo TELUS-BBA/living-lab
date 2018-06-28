@@ -23,7 +23,6 @@ class Iperf3ServerProcessProtocol(ProcessProtocol):
         self.calling_object = calling_object
 
     def connectionMade(self):
-        #print("iperf3 server process running; sending port")
         self.transport.closeStdin()
         self.calling_object.send_port()
 
@@ -63,13 +62,11 @@ class Iperf3MuxServer(LineOnlyReceiver):
             self.transport.loseConnection()
 
     def send_port(self):
-        #print("sending port {}".format(self.server_port))
         self.sendLine(str(self.server_port).encode())
 
     def run_server(self):
         process = Iperf3ServerProcessProtocol(self)
         cmd = ["iperf3", "-s", "-p", str(self.server_port), "-1"]
-        #print("spawning iperf3 server process")
         self.server_process = reactor.spawnProcess(process, cmd[0], cmd)
 
     def clear_server(self):
