@@ -209,7 +209,7 @@ if __name__ == "__main__":
     full_iperf3_result_url = "http://{}:{}{}".format(args.management_host, args.management_port,
                                                      args.iperf3_result_path)
     full_jitter_result_url = "http://{}:{}{}".format(args.management_host, args.management_port,
-                                                   args.jitter_result_path)
+                                                     args.jitter_result_path)
     full_sockperf_result_url = "http://{}:{}{}".format(args.management_host, args.management_port,
                                                        args.sockperf_result_path)
     full_ping_result_url = "http://{}:{}{}".format(args.management_host, args.management_port,
