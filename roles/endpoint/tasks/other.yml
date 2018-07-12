@@ -25,7 +25,7 @@
 
 - name: copy known_hosts to nanopi
   copy:
-    src: known_hosts
+    src: "{{ ssh_known_hosts_src }}"
     dest: /home/{{ ansible_user }}/.ssh/known_hosts
     mode: 0600
 

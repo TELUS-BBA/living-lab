@@ -42,6 +42,8 @@ all:
         ssh_public_key_src:
         # local location of nanopi private key (needed for role "endpoint" only)
         ssh_private_key_src:
+        # local location of known_hosts file so ssh can set tunnels up
+        ssh_known_hosts_src:
         # the host name of the tunnel through which nanopis access the management server
         management_host_tunnel: 
         # the port of the tunnel through which nanopis access the management server
