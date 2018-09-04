@@ -200,6 +200,7 @@ if __name__ == "__main__":
     parser.add_argument('iperf3_result_path', help="The path on the server that iperf3 results are posted to")
     parser.add_argument('jitter_result_path', help="The path on the server that jitter results are posted to")
     parser.add_argument('sockperf_result_path', help="The path on the server that sockperf results are posted to")
+    # this is now used as the second of each minute that ping test results are uploaded
     parser.add_argument('intense_test_minute', help="The minute of each hour that the intense test runs")
     args = parser.parse_args()
 
@@ -225,7 +226,7 @@ if __name__ == "__main__":
     scheduler.add_job(ping_test_upload,
                       args=(info, full_ping_result_url, ping_test_results),
                       coalesce=True,
-                      trigger='cron', minute='*/5')
+                      trigger='cron', minute='*', second=args.intense_test_minute)
     print("Starting scheduler...")
     try:
         scheduler.start()
