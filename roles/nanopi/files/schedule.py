@@ -176,9 +176,10 @@ def ping_test_upload(info, upload_url, results):
     print("Running ping test upload at {}".format(maya.now().rfc2822()))
     list_to_upload = copy(results)
     response = requests.post(upload_url, json=list_to_upload, auth=HTTPBasicAuth(info.get('username'), info.get('password')))
-    response.raise_for_status()
-    # if an exception is raised before this point the below code will be skipped
     del results[0:len(list_to_upload)]
+    response.raise_for_status()
+    # if an exception is raised before this point the below code will be skipped (old)
+    #del results[0:len(list_to_upload)]
     return response
 
 
