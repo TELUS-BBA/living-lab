@@ -144,7 +144,7 @@ Then, follow this process:
 
 2.  Run the command
 
-        ansible-playbook -i [filled inventory file] -K management.yml
+        ansible-playbook -i [filled inventory file] -Kk management.yml
 
     You will need to add -k to this command if you haven't configured have passwordless access to
     the management server.
@@ -161,14 +161,14 @@ Then, follow this process:
 
 4.  Configure the testing server with the command
 
-        ansible-playbook -i [filled inventory file] -K testing.yml
+        ansible-playbook -i [filled inventory file] -Kk testing.yml
 
     The same advice about -k as with the management server applies here.
 
 5.  Now you can configure the NanoPis.
     Ensure that they are accessible and listed under `nanopis.hosts` in your inventory, and run:
 
-        ansible-playbook -i [filled inventory file] -K endpoint.yml
+        ansible-playbook -i [filled inventory file] -Kk endpoint.yml
 
     The same advice about -k as with the management server applies here.
     This step configures the NanoPis to set up reliable SSH tunnels to the management server.
@@ -178,7 +178,7 @@ Then, follow this process:
     or you may do the final configuration now, disconnect them, and reconnect them
     at the place you want to test from. Either way, the command to run is
 
-        ansible-playbook -i [filled inventory file] -K nanopi.yml
+        ansible-playbook -i [filled inventory file] -Kk nanopi.yml
 
     If the NanoPis are behind a NAT you'll have to run this command from the management
     server with the inventory group `nanopis` configured as (for example)
