@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+# This script is used to generate the 'hosts' section of
+# your ansible inventory file. It parses the output of
+# `netstat -tulpn` into the desired result.
+
 import subprocess
 import re
 
